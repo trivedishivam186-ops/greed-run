@@ -633,6 +633,7 @@ GameObject:
   m_Component:
   - component: {fileID: 414697307}
   - component: {fileID: 414697308}
+  - component: {fileID: 414697309}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -676,6 +677,20 @@ MonoBehaviour:
   arenaHalfSize: 27
   dragForFullSpeed: 0.08
   deadZone: 0.01
+--- !u!114 &414697309
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 414697306}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46a7c80816762b846a94a5509c69b31b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
+  maxHealth: 100
+  restartDelay: 1.5
 --- !u!1 &446649051
 GameObject:
   m_ObjectHideFlags: 0
@@ -1062,6 +1077,61 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2104800727}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!1 &1317318136
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1317318138}
+  - component: {fileID: 1317318137}
+  m_Layer: 0
+  m_Name: EnemySpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1317318137
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1317318136}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f0a1e432f5096d4281f03371983131a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
+  enemyPrefab: {fileID: 7637292215931229295, guid: e5258babcdcf0344fa7474c4f236e480, type: 3}
+  player: {fileID: 414697309}
+  spawnDistance: 31
+  waveDuration: 20
+  startSpawnInterval: 1.2
+  intervalMultiplierPerWave: 0.85
+  minSpawnInterval: 0.2
+  startGroupSize: 1
+  groupSizeIncreasePerWave: 1
+  speedIncreasePerWave: 0.05
+  maxAlive: 150
+--- !u!4 &1317318138
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1317318136}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1454207948
 GameObject:
   m_ObjectHideFlags: 0
@@ -2009,3 +2079,4 @@ SceneRoots:
   - {fileID: 663843163}
   - {fileID: 2104800727}
   - {fileID: 414697307}
+  - {fileID: 1317318138}
