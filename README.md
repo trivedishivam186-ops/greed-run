@@ -5,7 +5,7 @@ A survivor-like with an extraction twist, built as a prototype for the Lila Game
 **The idea in one line:** your character auto-shoots while hordes grow. Every 60 seconds an exit portal opens for a few seconds — leave now and keep your loot, or stay for more and risk losing everything.
 
 - **Engine:** Unity 6.6 (6000.6.5f1), Web build
-- **Play in browser:** _link coming soon_
+- **Play in browser:** https://greed-run-game.netlify.app
 - **Status:** in development
 
 ## Project layout
