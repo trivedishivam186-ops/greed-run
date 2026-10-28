@@ -23,10 +23,13 @@ public class Enemy : MonoBehaviour
     public float contactRadius = 1.3f;
 
     [Tooltip("Enemies closer than this push each other apart.")]
-    public float separationRadius = 1.2f;
+    public float separationRadius = 1.5f;
 
     [Tooltip("How strongly enemies push apart. 0 = they all overlap.")]
-    public float separationStrength = 3f;
+    public float separationStrength = 6f;
+
+    [Tooltip("The fastest an enemy can be shoved sideways by others (units per second).")]
+    public float maxPushSpeed = 6f;
 
     // Every enemy alive, so they can avoid each other and the spawner can count them.
     public static readonly List<Enemy> All = new List<Enemy>();
@@ -69,11 +72,11 @@ public class Enemy : MonoBehaviour
             if (d > 0.001f && d < separationRadius)
                 push += away / d * (1f - d / separationRadius);
         }
-        move += push * separationStrength;
-
-        // Don't let the push make it faster than its normal speed.
-        move = Vector3.ClampMagnitude(move, 1f);
+        // Chase and push are applied separately, so the push still works when
+        // the whole horde is squeezing in on the player.
         transform.position += move * moveSpeed * Time.deltaTime;
+        Vector3 pushVelocity = Vector3.ClampMagnitude(push * separationStrength, maxPushSpeed);
+        transform.position += pushVelocity * Time.deltaTime;
 
         // Face the player.
         if (distance > 0.01f)
