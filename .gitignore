@@ -107,3 +107,8 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# Bought audio (Ovani Sound, royalty-free licence) - kept out of the public repo.
+# The licence allows using it in games, not sharing the raw files.
+/[Aa]ssets/[Aa]udio/
+/[Aa]ssets/[Aa]udio.meta
