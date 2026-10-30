@@ -29,3 +29,12 @@ Notes from playing the prototype, and what was changed because of them. Used for
 | 3 | Magnet and Heavy Rounds feel weak | Heavy Rounds +25% (10→12.5) didn't change hits-to-kill on 20 HP enemies, so you couldn't feel it | Heavy Rounds +25% → +50% (one card = 15, two = 22.5 → one-shot kills). Magnet +30% → +60%, and loot now *flies* to you inside the range so the upgrade is visible. Added Piercing Rounds (bullets pass through enemies) |
 | 4 | Late waves become one huge blob with no release | Constant pressure with no peaks and valleys gets exhausting | Added a rare **Nuke** pickup (inspired by Call of Duty Zombies) that wipes every enemy – and drops a pile of loot, which feeds the greed decision |
 | 5 | Waves blur together with no breathing space | Players need moments to breathe, collect loot and decide whether to evac | Waves now end only when every enemy is dead, followed by a 5-second breather before the next, bigger wave |
+
+## Playtest 3 – Fri 30 Oct (me, in editor)
+
+**Build:** + waves with breathers, nuke, personal bests, stash shop (start screen) with permanent upgrades and Black Box.
+
+| # | What I noticed | Why it matters | What I changed / plan |
+|---|---|---|---|
+| 1 | Shop works and extracting now feels rewarding | Banked loot finally has a use – the run → bank → upgrade loop is complete | Keep |
+| 2 | Difficulty is about right for now, but if I play well, surviving becomes easy | One enemy type means one answer: once your build handles the swarm, nothing new tests you | **Planned:** more enemy types (fast and tanky) and the Collector, an AI-Director enemy that targets greedy players' loot |
