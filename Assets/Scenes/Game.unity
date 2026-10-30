@@ -757,7 +757,7 @@ Transform:
   m_GameObject: {fileID: 404023864}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.63, z: 8}
+  m_LocalPosition: {x: 0, y: 0.63, z: 15.11}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -983,6 +983,7 @@ MonoBehaviour:
   range: 15
   projectilesPerShot: 1
   spreadAngle: 20
+  pierce: 0
   muzzleHeight: 1
 --- !u!114 &414697311
 MonoBehaviour:
@@ -997,6 +998,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LootTrail
   pickupRange: 2.5
+  magnetSpeed: 16
+  collectDistance: 1
   spacing: 0.7
   startGap: 1
   followSharpness: 18
@@ -1742,7 +1745,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -90}
+  m_AnchoredPosition: {x: 0, y: -130}
   m_SizeDelta: {x: 500, y: 120}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1206679115
@@ -1993,6 +1996,7 @@ GameObject:
   - component: {fileID: 1317318138}
   - component: {fileID: 1317318137}
   - component: {fileID: 1317318139}
+  - component: {fileID: 1317318140}
   m_Layer: 0
   m_Name: EnemySpawner
   m_TagString: Untagged
@@ -2015,7 +2019,10 @@ MonoBehaviour:
   enemyPrefab: {fileID: 7637292215931229295, guid: e5258babcdcf0344fa7474c4f236e480, type: 3}
   player: {fileID: 414697309}
   spawnDistance: 31
-  waveDuration: 20
+  firstWaveEnemies: 10
+  extraEnemiesPerWave: 6
+  firstWaveDelay: 2
+  breatherTime: 5
   startSpawnInterval: 1.2
   intervalMultiplierPerWave: 0.85
   minSpawnInterval: 0.2
@@ -2052,7 +2059,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LootDropper
   lootPrefab: {fileID: 5197664529986018630, guid: fe916bc9eb5fb5247ac75037f66fdea4, type: 3}
   dropChance: 0.6
+  nukeDropChance: 0.35
   scatterDistance: 0.8
+--- !u!114 &1317318140
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1317318136}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f99ea62f8b5d844bba57607446130c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NukeDropper
+  nukePrefab: {fileID: 1300926797710296815, guid: 862c7abe0949a2d479c279d2dc2b2b45, type: 3}
+  player: {fileID: 414697307}
+  baseChance: 0.01
+  bigHordeSize: 80
+  bigHordeBonusChance: 0.03
+  minTimeBetweenNukes: 40
+  earliestNuke: 30
 --- !u!1 &1454207948
 GameObject:
   m_ObjectHideFlags: 0
@@ -2562,8 +2589,90 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
   m_AnchoredPosition: {x: 0, y: -20}
-  m_SizeDelta: {x: 200, y: 50}
+  m_SizeDelta: {x: 300, y: 80}
   m_Pivot: {x: 0.5, y: 1}
+--- !u!1 &1703357345
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1703357347}
+  - component: {fileID: 1703357346}
+  m_Layer: 0
+  m_Name: StashShop
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1703357346
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1703357345}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e17b7164f0719f2439b3d56336700d9d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StashShop
+  canvas: {fileID: 1512111818}
+  playerHealth: {fileID: 414697309}
+  shooter: {fileID: 414697310}
+  lootTrail: {fileID: 414697311}
+  fontSource: {fileID: 1682718288}
+  upgrades:
+  - id: health
+    title: MAX HEALTH
+    description: +20 health
+    type: 0
+    amountPerLevel: 20
+    maxLevel: 5
+    baseCost: 100
+    costGrowth: 1.6
+  - id: damage
+    title: STARTING DAMAGE
+    description: +15% bullet damage
+    type: 1
+    amountPerLevel: 15
+    maxLevel: 5
+    baseCost: 120
+    costGrowth: 1.6
+  - id: magnet
+    title: PICKUP RANGE
+    description: +15% loot pull range
+    type: 2
+    amountPerLevel: 15
+    maxLevel: 5
+    baseCost: 80
+    costGrowth: 1.6
+  - id: blackbox
+    title: BLACK BOX
+    description: Keep 10% of your loot if you die
+    type: 3
+    amountPerLevel: 10
+    maxLevel: 3
+    baseCost: 250
+    costGrowth: 2
+--- !u!4 &1703357347
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1703357345}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.43683, y: 0, z: 7.58583}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1736550943
 GameObject:
   m_ObjectHideFlags: 0
@@ -3262,6 +3371,112 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1926346933
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1926346935}
+  - component: {fileID: 1926346934}
+  m_Layer: 0
+  m_Name: LevelUpSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1926346934
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1926346933}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90e41c8028ff5b9478057bbbe280afe0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LevelUpSystem
+  canvas: {fileID: 1512111818}
+  shooter: {fileID: 414697310}
+  movement: {fileID: 414697308}
+  lootTrail: {fileID: 414697311}
+  playerHealth: {fileID: 414697309}
+  evac: {fileID: 1157445174}
+  endScreen: {fileID: 1512111820}
+  fontSource: {fileID: 1682718288}
+  xpPerKill: 1
+  firstLevelXp: 5
+  extraXpPerLevel: 4
+  xpFromNukeKills: 0
+  choices: 3
+  upgrades:
+  - title: RAPID FIRE
+    description: +20% fire rate
+    type: 0
+    amount: 20
+    maxTimes: 6
+    timesTaken: 0
+  - title: HEAVY ROUNDS
+    description: +50% damage
+    type: 1
+    amount: 50
+    maxTimes: 6
+    timesTaken: 0
+  - title: SPREAD SHOT
+    description: +1 bullet per shot
+    type: 2
+    amount: 1
+    maxTimes: 4
+    timesTaken: 0
+  - title: LONG BARREL
+    description: +15% range
+    type: 3
+    amount: 15
+    maxTimes: 4
+    timesTaken: 0
+  - title: SERVO LEGS
+    description: +10% move speed
+    type: 4
+    amount: 10
+    maxTimes: 4
+    timesTaken: 0
+  - title: MAGNET
+    description: +60% pickup range
+    type: 5
+    amount: 60
+    maxTimes: 4
+    timesTaken: 0
+  - title: PLATING
+    description: +25 max health, heal 25
+    type: 6
+    amount: 25
+    maxTimes: 5
+    timesTaken: 0
+  - title: PIERCING ROUNDS
+    description: Bullets go through +1 enemy
+    type: 7
+    amount: 1
+    maxTimes: 3
+    timesTaken: 0
+--- !u!4 &1926346935
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1926346933}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.06341, y: -0, z: 8.00228}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1944471763
 GameObject:
   m_ObjectHideFlags: 0
@@ -3912,3 +4127,5 @@ SceneRoots:
   - {fileID: 404023866}
   - {fileID: 1157445175}
   - {fileID: 1859716039}
+  - {fileID: 1926346935}
+  - {fileID: 1703357347}
