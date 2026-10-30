@@ -22,9 +22,23 @@ public class GameFeel : MonoBehaviour
     public Material goldMaterial;  // M_LootGold
     public Material cyanMaterial;  // M_Bullet
 
+    [Header("Your own sounds (optional - these replace the built-in ones)")]
+    [Tooltip("Looping background music.")]
+    public AudioClip backgroundMusic;
+    [Tooltip("Plays when you extract. Replaces the built-in 'extract' jingle.")]
+    public AudioClip successSound;
+    [Tooltip("Plays when you die. Replaces the built-in 'death' sound.")]
+    public AudioClip failureSound;
+    [Tooltip("Plays when the evac opens. Replaces the built-in alarm.")]
+    public AudioClip evacSound;
+
     [Header("Volume (designer knobs)")]
     [Range(0f, 1f)] public float masterVolume = 0.8f;
     [Range(0f, 1f)] public float shootVolume = 0.25f;
+    [Range(0f, 1f)] public float musicVolume = 0.35f;
+
+    [Tooltip("Music volume while the end screen is showing (so the success/failure sound stands out).")]
+    [Range(0f, 1f)] public float musicVolumeOnEndScreen = 0.12f;
 
     [Header("Shake strength (designer knobs)")]
     public float shakeOnEnemyDeath = 0.04f;
@@ -35,6 +49,8 @@ public class GameFeel : MonoBehaviour
 
     readonly Dictionary<string, AudioClip> clips = new Dictionary<string, AudioClip>();
     readonly List<AudioSource> voices = new List<AudioSource>();
+    AudioSource music;
+    float musicTarget;
     int nextVoice;
     float lastShootSound;
 
@@ -56,6 +72,24 @@ public class GameFeel : MonoBehaviour
             s.playOnAwake = false;
             s.spatialBlend = 0f; // 2D sound
             voices.Add(s);
+        }
+
+        // Your clips replace the built-in ones with the same job.
+        if (successSound != null) clips["extract"] = successSound;
+        if (failureSound != null) clips["death"] = failureSound;
+        if (evacSound != null) clips["evac_open"] = evacSound;
+
+        // Background music on its own looping source.
+        if (backgroundMusic != null)
+        {
+            music = gameObject.AddComponent<AudioSource>();
+            music.clip = backgroundMusic;
+            music.loop = true;
+            music.playOnAwake = false;
+            music.spatialBlend = 0f;
+            musicTarget = musicVolume;
+            music.volume = musicVolume * masterVolume;
+            music.Play();
         }
 
         // Debris
@@ -158,6 +192,7 @@ public class GameFeel : MonoBehaviour
 
     void HandlePlayerDied()
     {
+        musicTarget = musicVolumeOnEndScreen;
         Play("death", 1f, 0f);
         if (cameraFollow != null && cameraFollow.target != null)
             Burst(redBurst, cameraFollow.target.position + Vector3.up, 30, 10f, 0.3f, 1f);
@@ -181,6 +216,7 @@ public class GameFeel : MonoBehaviour
 
     void HandleExtracted(Vector3 pos)
     {
+        musicTarget = musicVolumeOnEndScreen;
         Play("extract", 1f, 0f);
         Burst(goldBurst, pos + Vector3.up, 40, 9f, 0.25f, 1.2f);
         Flash(new Color(1f, 0.8f, 0.2f), 0.45f);
@@ -191,6 +227,10 @@ public class GameFeel : MonoBehaviour
 
     void Update()
     {
+        // Smoothly move the music volume towards its target (real time, works when frozen).
+        if (music != null)
+            music.volume = Mathf.MoveTowards(music.volume, musicTarget * masterVolume, Time.unscaledDeltaTime);
+
         // Fade the screen flash (uses real time so it still fades on the frozen end screen).
         if (flash != null && flashAlpha > 0f)
         {
