@@ -262,6 +262,7 @@ public class LevelUpSystem : MonoBehaviour
             card.anchoredPosition = new Vector2(0f, 140f - i * 165f);
 
             Image bg = AddImage(card, CardBg);
+            bg.raycastTarget = true; // the card must catch taps, or the button can't be pressed
             Outline outline = card.gameObject.AddComponent<Outline>();
             outline.effectColor = Gold;
             outline.effectDistance = new Vector2(3f, -3f);
