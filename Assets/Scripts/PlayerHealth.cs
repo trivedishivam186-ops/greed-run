@@ -45,6 +45,13 @@ public class PlayerHealth : MonoBehaviour
             OnPlayerDamaged?.Invoke(amount);
     }
 
+    /// <summary>Raise max health (and heal the same amount). Used by level-up upgrades.</summary>
+    public void AddMaxHealth(float amount)
+    {
+        maxHealth += amount;
+        CurrentHealth = Mathf.Min(maxHealth, CurrentHealth + amount);
+    }
+
     void Die()
     {
         IsDead = true;

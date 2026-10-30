@@ -130,6 +130,7 @@ public class GameFeel : MonoBehaviour
         EvacManager.OnEvacOpened += HandleEvacOpened;
         EvacManager.OnEvacMissed += HandleEvacMissed;
         EvacManager.OnExtracted += HandleExtracted;
+        LevelUpSystem.OnLevelUp += HandleLevelUp;
     }
 
     void OnDisable()
@@ -144,6 +145,13 @@ public class GameFeel : MonoBehaviour
         EvacManager.OnEvacOpened -= HandleEvacOpened;
         EvacManager.OnEvacMissed -= HandleEvacMissed;
         EvacManager.OnExtracted -= HandleExtracted;
+        LevelUpSystem.OnLevelUp -= HandleLevelUp;
+    }
+
+    void HandleLevelUp()
+    {
+        Play("levelup", 0.9f, 0f);
+        Flash(new Color(0f, 0.9f, 1f), 0.25f);
     }
 
     // ---------- What happens on each event ----------
