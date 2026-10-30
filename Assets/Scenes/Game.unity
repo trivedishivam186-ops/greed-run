@@ -712,6 +712,8 @@ MonoBehaviour:
   target: {fileID: 414697307}
   offset: {x: 0, y: 32, z: -22}
   smoothTime: 0.15
+  maxShake: 0.6
+  shakeDecay: 2.5
 --- !u!1 &404023864
 GameObject:
   m_ObjectHideFlags: 0
@@ -1681,7 +1683,7 @@ MonoBehaviour:
   spawner: {fileID: 1317318137}
   endScreen: {fileID: 1512111820}
   evacPad: {fileID: 404023866}
-  firstEvacAt: 15
+  firstEvacAt: 30
   timeBetweenEvacs: 15
   openDuration: 10
   extractHoldTime: 1
@@ -3197,6 +3199,69 @@ RectTransform:
   m_AnchoredPosition: {x: -20, y: -20}
   m_SizeDelta: {x: 260, y: 50}
   m_Pivot: {x: 1, y: 1}
+--- !u!1 &1859716037
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1859716039}
+  - component: {fileID: 1859716038}
+  m_Layer: 0
+  m_Name: GameFeel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1859716038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1859716037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4eeee24b30d5b8a45948f3a9c93bcef6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameFeel
+  cameraFollow: {fileID: 330585548}
+  canvas: {fileID: 1512111818}
+  redMaterial: {fileID: 2100000, guid: 95f8b8350781ca647b1a553c913622e0, type: 2}
+  goldMaterial: {fileID: 2100000, guid: bc73eb7663b46124bbf3bfeb664652c2, type: 2}
+  cyanMaterial: {fileID: 2100000, guid: a7ddaa1681f09c643a40ad025f7cfaba, type: 2}
+  backgroundMusic: {fileID: 8300000, guid: f5d9f2bd4a7543c4189547b83cf387b2, type: 3}
+  successSound: {fileID: 8300000, guid: 18d176ae026e4424da9b4df77856de46, type: 3}
+  failureSound: {fileID: 8300000, guid: 34d44ff68710c6c44adea66a58198db8, type: 3}
+  evacSound: {fileID: 8300000, guid: 52ab467589b2d3a488d4bf26b4bf5857, type: 3}
+  masterVolume: 0.8
+  shootVolume: 0.25
+  musicVolume: 0.35
+  knockOffSound: 0
+  musicVolumeOnEndScreen: 0.12
+  shakeOnEnemyDeath: 0.04
+  shakeOnHurt: 0.35
+  shakeOnEvacOpen: 0.15
+  shakeOnExtract: 0.5
+  shakeOnDeath: 0.8
+--- !u!4 &1859716039
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1859716037}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.06341, y: -0, z: 8.00228}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1944471763
 GameObject:
   m_ObjectHideFlags: 0
@@ -3846,3 +3911,4 @@ SceneRoots:
   - {fileID: 507314956}
   - {fileID: 404023866}
   - {fileID: 1157445175}
+  - {fileID: 1859716039}
