@@ -10,8 +10,14 @@ using UnityEngine;
 public class LootTrail : MonoBehaviour
 {
     [Header("Pickup (designer knobs)")]
-    [Tooltip("How close you need to be to grab a core from the floor.")]
+    [Tooltip("Cores closer than this get pulled towards you (the Magnet upgrade raises it).")]
     public float pickupRange = 2.5f;
+
+    [Tooltip("How fast pulled cores fly towards you.")]
+    public float magnetSpeed = 16f;
+
+    [Tooltip("Cores this close join the tail.")]
+    public float collectDistance = 1.0f;
 
     [Header("Trail shape")]
     [Tooltip("Gap between cores in the tail.")]
@@ -90,11 +96,19 @@ public class LootTrail : MonoBehaviour
             if (c == null || Time.time < c.PickupAllowedAt) continue;
             Vector3 d = c.transform.position - transform.position;
             d.y = 0f;
-            if (d.sqrMagnitude < rangeSq)
+            if (d.sqrMagnitude >= rangeSq) continue;
+
+            if (d.magnitude <= collectDistance)
             {
                 c.JoinTrail();
                 Cores.Add(c); // newest cores go on the end of the tail
                 OnPickedUp?.Invoke(c.transform.position, Cores.Count);
+            }
+            else
+            {
+                // Pull it in like a magnet.
+                Vector3 target = new Vector3(transform.position.x, c.transform.position.y, transform.position.z);
+                c.transform.position = Vector3.MoveTowards(c.transform.position, target, magnetSpeed * Time.deltaTime);
             }
         }
     }

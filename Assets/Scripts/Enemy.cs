@@ -46,6 +46,25 @@ public class Enemy : MonoBehaviour
 
     public bool IsDead { get; private set; }
 
+    /// <summary>True while a nuke is wiping the horde (so XP and per-kill sounds can be skipped).</summary>
+    public static bool NukeInProgress { get; private set; }
+
+    /// <summary>Kill every enemy alive right now.</summary>
+    public static int KillAll()
+    {
+        NukeInProgress = true;
+        List<Enemy> copy = new List<Enemy>(All);
+        int killed = 0;
+        foreach (Enemy e in copy)
+        {
+            if (e == null || e.IsDead) continue;
+            e.TakeDamage(float.MaxValue);
+            killed++;
+        }
+        NukeInProgress = false;
+        return killed;
+    }
+
     Transform player;
     PlayerHealth playerHealth;
     float nextHitTime;

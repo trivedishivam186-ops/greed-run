@@ -1,12 +1,17 @@
 using UnityEngine;
 
 /// <summary>
-/// Spawns enemies just outside the arena edge, in waves that grow over time.
-/// Every wave: enemies spawn more often, a few more at once, and walk a little faster.
+/// Spawns enemies in proper waves:
+///   1. A wave has a set number of enemies, which arrive in groups from outside the arena.
+///   2. The wave is cleared when every one of them is dead.
+///   3. Then there's a short breather before the next, bigger wave starts.
+/// Skipping an evac (greed) jumps the wave number up and adds enemies to the current wave.
 /// All the numbers are designer knobs in the Inspector.
 /// </summary>
 public class EnemySpawner : MonoBehaviour
 {
+    public enum WaveState { Breather, Spawning, Clearing }
+
     [Header("References")]
     [Tooltip("The enemy prefab to spawn.")]
     public Enemy enemyPrefab;
@@ -18,21 +23,32 @@ public class EnemySpawner : MonoBehaviour
     [Tooltip("Enemies spawn on a square this far from the centre. The outer neon edge is at 28.")]
     public float spawnDistance = 31f;
 
-    [Header("Waves (designer knobs)")]
-    [Tooltip("How long each wave lasts, in seconds.")]
-    public float waveDuration = 20f;
+    [Header("Wave size (designer knobs)")]
+    [Tooltip("Enemies in wave 1.")]
+    public int firstWaveEnemies = 10;
 
-    [Tooltip("Seconds between spawns in wave 1.")]
+    [Tooltip("Extra enemies added to each wave after that.")]
+    public int extraEnemiesPerWave = 6;
+
+    [Header("Breathing space (designer knobs)")]
+    [Tooltip("Seconds before wave 1 starts.")]
+    public float firstWaveDelay = 2f;
+
+    [Tooltip("Seconds of calm after a wave is cleared, before the next one starts.")]
+    public float breatherTime = 5f;
+
+    [Header("Spawning within a wave (designer knobs)")]
+    [Tooltip("Seconds between groups in wave 1.")]
     public float startSpawnInterval = 1.2f;
 
-    [Tooltip("Each wave, the gap between spawns is multiplied by this (0.85 = 15% faster).")]
+    [Tooltip("Each wave, the gap between groups is multiplied by this (0.85 = 15% faster).")]
     [Range(0.5f, 1f)]
     public float intervalMultiplierPerWave = 0.85f;
 
-    [Tooltip("The fastest spawning can ever get (seconds between spawns).")]
+    [Tooltip("The fastest groups can ever arrive (seconds between groups).")]
     public float minSpawnInterval = 0.2f;
 
-    [Tooltip("Enemies spawned at once in wave 1.")]
+    [Tooltip("Enemies per group in wave 1.")]
     public int startGroupSize = 1;
 
     [Tooltip("Extra enemies added to each group every wave.")]
@@ -44,42 +60,98 @@ public class EnemySpawner : MonoBehaviour
     [Tooltip("Never more than this many enemies alive at once (keeps phones running smoothly).")]
     public int maxAlive = 150;
 
-    public int CurrentWave { get; private set; } = 1;
+    // Sounds and the HUD listen to these.
+    public static event System.Action<int> OnWaveStarted;
+    public static event System.Action<int> OnWaveCleared;
 
-    float waveTimer;
+    public int CurrentWave { get; private set; }
+    public WaveState State { get; private set; } = WaveState.Breather;
+    public float BreatherTimeLeft { get; private set; }
+
+    /// <summary>Enemies still to come in this wave plus those alive now.</summary>
+    public int EnemiesRemaining => toSpawn + AliveCount();
+
+    int toSpawn;
     float spawnTimer;
+
+    void Start()
+    {
+        CurrentWave = 0;
+        State = WaveState.Breather;
+        BreatherTimeLeft = firstWaveDelay;
+    }
 
     void Update()
     {
         if (enemyPrefab == null || player == null || player.IsDead) return;
 
-        // Move on to the next wave when this one's time is up.
-        waveTimer += Time.deltaTime;
-        if (waveTimer >= waveDuration)
+        switch (State)
         {
-            waveTimer = 0f;
-            CurrentWave++;
-            Debug.Log($"Wave {CurrentWave}");
-        }
+            case WaveState.Breather:
+                BreatherTimeLeft -= Time.deltaTime;
+                if (BreatherTimeLeft <= 0f) StartWave(CurrentWave + 1);
+                break;
 
-        // Spawn a group whenever the timer runs out.
-        spawnTimer -= Time.deltaTime;
-        if (spawnTimer <= 0f)
-        {
-            int groupSize = startGroupSize + groupSizeIncreasePerWave * (CurrentWave - 1);
-            for (int i = 0; i < groupSize && Enemy.All.Count < maxAlive; i++)
-                SpawnOne();
+            case WaveState.Spawning:
+                spawnTimer -= Time.deltaTime;
+                if (spawnTimer <= 0f)
+                {
+                    int groupSize = startGroupSize + groupSizeIncreasePerWave * (CurrentWave - 1);
+                    for (int i = 0; i < groupSize && toSpawn > 0 && AliveCount() < maxAlive; i++)
+                    {
+                        SpawnOne();
+                        toSpawn--;
+                    }
 
-            float interval = startSpawnInterval * Mathf.Pow(intervalMultiplierPerWave, CurrentWave - 1);
-            spawnTimer = Mathf.Max(minSpawnInterval, interval);
+                    float interval = startSpawnInterval * Mathf.Pow(intervalMultiplierPerWave, CurrentWave - 1);
+                    spawnTimer = Mathf.Max(minSpawnInterval, interval);
+                }
+                if (toSpawn <= 0) State = WaveState.Clearing;
+                break;
+
+            case WaveState.Clearing:
+                if (AliveCount() == 0)
+                {
+                    Debug.Log($"Wave {CurrentWave} cleared");
+                    OnWaveCleared?.Invoke(CurrentWave);
+                    State = WaveState.Breather;
+                    BreatherTimeLeft = breatherTime;
+                }
+                break;
         }
     }
 
-    /// <summary>Jump the difficulty forward (used when the player skips an evac).</summary>
+    void StartWave(int wave)
+    {
+        CurrentWave = wave;
+        toSpawn = firstWaveEnemies + extraEnemiesPerWave * (wave - 1);
+        spawnTimer = 0f;
+        State = WaveState.Spawning;
+        Debug.Log($"Wave {CurrentWave}: {toSpawn} enemies");
+        OnWaveStarted?.Invoke(CurrentWave);
+    }
+
+    /// <summary>
+    /// Greed: jump the difficulty forward (used when the player skips an evac).
+    /// The wave number goes up, and the current wave gets extra enemies straight away.
+    /// </summary>
     public void AddWaves(int count)
     {
         CurrentWave += count;
+        if (State != WaveState.Breather)
+        {
+            toSpawn += extraEnemiesPerWave * count;
+            State = WaveState.Spawning;
+        }
         Debug.Log($"Greed! Jumped to wave {CurrentWave}");
+    }
+
+    int AliveCount()
+    {
+        int n = 0;
+        for (int i = 0; i < Enemy.All.Count; i++)
+            if (Enemy.All[i] != null && !Enemy.All[i].IsDead) n++;
+        return n;
     }
 
     void SpawnOne()

@@ -21,7 +21,8 @@ public class LevelUpSystem : MonoBehaviour
         RangePercent,
         MoveSpeedPercent,
         PickupRangePercent,
-        MaxHealth
+        MaxHealth,
+        Pierce
     }
 
     [Serializable]
@@ -61,6 +62,9 @@ public class LevelUpSystem : MonoBehaviour
     [Tooltip("Extra XP needed for each level after that.")]
     public int extraXpPerLevel = 4;
 
+    [Tooltip("Do enemies killed by a nuke give XP? Off, so one nuke doesn't trigger 10 level-ups in a row.")]
+    public bool xpFromNukeKills = false;
+
     [Tooltip("How many cards to offer.")]
     public int choices = 3;
 
@@ -68,11 +72,12 @@ public class LevelUpSystem : MonoBehaviour
     public List<Upgrade> upgrades = new List<Upgrade>
     {
         new Upgrade { title = "RAPID FIRE",   description = "+20% fire rate",          type = UpgradeType.FireRatePercent,    amount = 20, maxTimes = 6 },
-        new Upgrade { title = "HEAVY ROUNDS", description = "+25% damage",             type = UpgradeType.DamagePercent,      amount = 25, maxTimes = 6 },
+        new Upgrade { title = "HEAVY ROUNDS", description = "+50% damage",             type = UpgradeType.DamagePercent,      amount = 50, maxTimes = 6 },
         new Upgrade { title = "SPREAD SHOT",  description = "+1 bullet per shot",      type = UpgradeType.ExtraProjectile,    amount = 1,  maxTimes = 4 },
         new Upgrade { title = "LONG BARREL",  description = "+15% range",              type = UpgradeType.RangePercent,       amount = 15, maxTimes = 4 },
         new Upgrade { title = "SERVO LEGS",   description = "+10% move speed",         type = UpgradeType.MoveSpeedPercent,   amount = 10, maxTimes = 4 },
-        new Upgrade { title = "MAGNET",       description = "+30% pickup range",       type = UpgradeType.PickupRangePercent, amount = 30, maxTimes = 4 },
+        new Upgrade { title = "MAGNET",       description = "+60% loot pull range",    type = UpgradeType.PickupRangePercent, amount = 60, maxTimes = 4 },
+        new Upgrade { title = "PIERCING ROUNDS", description = "Bullets go through +1 enemy", type = UpgradeType.Pierce, amount = 1, maxTimes = 3 },
         new Upgrade { title = "PLATING",      description = "+25 max health, heal 25", type = UpgradeType.MaxHealth,          amount = 25, maxTimes = 5 },
     };
 
@@ -111,6 +116,7 @@ public class LevelUpSystem : MonoBehaviour
     void HandleKill(Vector3 _)
     {
         if (RunIsOver()) return;
+        if (Enemy.NukeInProgress && !xpFromNukeKills) return;
 
         Xp += xpPerKill;
         while (Xp >= XpToNext)
@@ -210,6 +216,8 @@ public class LevelUpSystem : MonoBehaviour
                 if (movement != null) movement.moveSpeed *= pct; break;
             case UpgradeType.PickupRangePercent:
                 if (lootTrail != null) lootTrail.pickupRange *= pct; break;
+            case UpgradeType.Pierce:
+                if (shooter != null) shooter.pierce += Mathf.RoundToInt(u.amount); break;
             case UpgradeType.MaxHealth:
                 if (playerHealth != null) playerHealth.AddMaxHealth(u.amount); break;
         }

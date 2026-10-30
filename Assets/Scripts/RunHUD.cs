@@ -28,7 +28,19 @@ public class RunHUD : MonoBehaviour
             healthText.text = $"HP {Mathf.CeilToInt(playerHealth.CurrentHealth)}";
 
         if (waveText != null && spawner != null)
-            waveText.text = $"WAVE {spawner.CurrentWave}";
+        {
+            if (spawner.State == EnemySpawner.WaveState.Breather)
+            {
+                int next = Mathf.CeilToInt(spawner.BreatherTimeLeft);
+                waveText.text = spawner.CurrentWave == 0
+                    ? $"GET READY  {next}"
+                    : $"WAVE {spawner.CurrentWave} CLEARED\n<size=70%>NEXT IN {next}</size>";
+            }
+            else
+            {
+                waveText.text = $"WAVE {spawner.CurrentWave}\n<size=70%>{spawner.EnemiesRemaining} LEFT</size>";
+            }
+        }
 
         if (atRiskText != null && lootTrail != null)
         {
