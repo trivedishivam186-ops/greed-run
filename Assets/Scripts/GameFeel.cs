@@ -37,6 +37,9 @@ public class GameFeel : MonoBehaviour
     [Range(0f, 1f)] public float shootVolume = 0.25f;
     [Range(0f, 1f)] public float musicVolume = 0.35f;
 
+    [Tooltip("Play a sound when an enemy knocks a core off your tail. Off by default (it got noisy in big hordes).")]
+    public bool knockOffSound = false;
+
     [Tooltip("Music volume while the end screen is showing (so the success/failure sound stands out).")]
     [Range(0f, 1f)] public float musicVolumeOnEndScreen = 0.12f;
 
@@ -179,7 +182,7 @@ public class GameFeel : MonoBehaviour
 
     void HandleKnockedOff(Vector3 pos)
     {
-        Play("knock", 0.7f, 0.1f);
+        if (knockOffSound) Play("knock", 0.7f, 0.1f);
         Burst(goldBurst, pos, 8, 6f, 0.15f, 0.5f);
     }
 
