@@ -17,3 +17,15 @@ Notes from playing the prototype, and what was changed because of them. Used for
 | 7 | Banked loot shows a number but has no use yet, so extracting doesn't feel rewarding | The reward has to matter for greed to be a real decision | **Planned:** stash upgrade shop |
 | 8 | Fun, but missing sounds, effects and rewards | Game feel makes simple shapes satisfying | **Planned:** game feel pass (shake, flashes, explosions, sounds) |
 | 9 | The 1-second hold on the pad is good – you still have to survive the last second | Makes leaving a commitment | Keep |
+
+## Playtest 2 – Fri 30 Oct (me, in editor)
+
+**Build:** + level-up cards, game feel (sounds, debris, shake), evac edge glow.
+
+| # | What I noticed | Why it matters | What I changed |
+|---|---|---|---|
+| 1 | Level-ups come at a good pace and are useful | Power now grows with the threat | Keep |
+| 2 | I can survive much longer than before | Fixes "the horde outgrows my gun" from playtest 1 | Keep |
+| 3 | Magnet and Heavy Rounds feel weak | Heavy Rounds +25% (10→12.5) didn't change hits-to-kill on 20 HP enemies, so you couldn't feel it | Heavy Rounds +25% → +50% (one card = 15, two = 22.5 → one-shot kills). Magnet +30% → +60%, and loot now *flies* to you inside the range so the upgrade is visible. Added Piercing Rounds (bullets pass through enemies) |
+| 4 | Late waves become one huge blob with no release | Constant pressure with no peaks and valleys gets exhausting | Added a rare **Nuke** pickup (inspired by Call of Duty Zombies) that wipes every enemy – and drops a pile of loot, which feeds the greed decision |
+| 5 | Waves blur together with no breathing space | Players need moments to breathe, collect loot and decide whether to evac | Waves now end only when every enemy is dead, followed by a 5-second breather before the next, bigger wave |
