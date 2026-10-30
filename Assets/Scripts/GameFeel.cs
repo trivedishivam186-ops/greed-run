@@ -133,6 +133,8 @@ public class GameFeel : MonoBehaviour
         LevelUpSystem.OnLevelUp += HandleLevelUp;
         NukePickup.OnNuke += HandleNuke;
         EvacManager.OnNewBest += HandleNewBest;
+        StashShop.OnPurchased += HandlePurchased;
+        StashShop.OnDeploy += HandleDeploy;
         EnemySpawner.OnWaveStarted += HandleWaveStarted;
         EnemySpawner.OnWaveCleared += HandleWaveCleared;
     }
@@ -152,8 +154,20 @@ public class GameFeel : MonoBehaviour
         LevelUpSystem.OnLevelUp -= HandleLevelUp;
         NukePickup.OnNuke -= HandleNuke;
         EvacManager.OnNewBest -= HandleNewBest;
+        StashShop.OnPurchased -= HandlePurchased;
+        StashShop.OnDeploy -= HandleDeploy;
         EnemySpawner.OnWaveStarted -= HandleWaveStarted;
         EnemySpawner.OnWaveCleared -= HandleWaveCleared;
+    }
+
+    void HandlePurchased()
+    {
+        Play("pickup", 0.8f, 0f, 1.4f);
+    }
+
+    void HandleDeploy()
+    {
+        Play("wave_start", 0.7f, 0f);
     }
 
     void HandleNewBest()

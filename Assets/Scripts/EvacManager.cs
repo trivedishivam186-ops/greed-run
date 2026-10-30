@@ -74,7 +74,6 @@ public class EvacManager : MonoBehaviour
 
     void Start()
     {
-        Time.timeScale = 1f; // in case the last run ended frozen
         TimeUntilOpen = firstEvacAt;
         if (evacPad != null) evacPad.gameObject.SetActive(false);
     }
@@ -189,7 +188,16 @@ public class EvacManager : MonoBehaviour
         int wave = spawner != null ? spawner.CurrentWave : 0;
         bool bestWave = Stash.TryRecordWave(wave);
 
+        // Black Box upgrade: keep a share of what you were carrying.
+        int kept = Mathf.RoundToInt(lost * StashShop.KeepOnDeath);
+        if (kept > 0)
+        {
+            Stash.Add(kept);
+            lost -= kept;
+        }
+
         string body = $"LOST  {lost}\n";
+        if (kept > 0) body += $"<color=#FFC21A>BLACK BOX RECOVERED  +{kept}</color>\n";
         body += $"WAVE  {wave}{NewBest(bestWave)}\n";
         if (EvacsSkipped > 0 && bankableAtLastEvac > 0)
             body += $"If you'd left at the last evac, you'd have banked {bankableAtLastEvac}.\n";
