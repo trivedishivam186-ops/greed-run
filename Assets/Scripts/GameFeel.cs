@@ -1,0 +1,295 @@
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
+/// <summary>
+/// All the "juice" in one place: sounds, debris bursts, screen shake and screen flashes.
+/// It listens to events from the other scripts, so nothing else needs to know it exists.
+/// Sounds are loaded automatically from Assets/Resources/Audio - swap any .wav there to change a sound.
+/// Put this on an empty "GameFeel" object.
+/// </summary>
+public class GameFeel : MonoBehaviour
+{
+    [Header("References")]
+    [Tooltip("The camera follow script (for screen shake).")]
+    public CameraFollow cameraFollow;
+
+    [Tooltip("The HUD canvas (a full-screen flash is added to it).")]
+    public Canvas canvas;
+
+    [Header("Debris materials (use the glowing ones)")]
+    public Material redMaterial;   // M_EnemyRed
+    public Material goldMaterial;  // M_LootGold
+    public Material cyanMaterial;  // M_Bullet
+
+    [Header("Volume (designer knobs)")]
+    [Range(0f, 1f)] public float masterVolume = 0.8f;
+    [Range(0f, 1f)] public float shootVolume = 0.25f;
+
+    [Header("Shake strength (designer knobs)")]
+    public float shakeOnEnemyDeath = 0.04f;
+    public float shakeOnHurt = 0.35f;
+    public float shakeOnEvacOpen = 0.15f;
+    public float shakeOnExtract = 0.5f;
+    public float shakeOnDeath = 0.8f;
+
+    readonly Dictionary<string, AudioClip> clips = new Dictionary<string, AudioClip>();
+    readonly List<AudioSource> voices = new List<AudioSource>();
+    int nextVoice;
+    float lastShootSound;
+
+    ParticleSystem redBurst, goldBurst, cyanBurst;
+    RawImage flash;
+    float flashAlpha;
+    Color flashColor;
+
+    // ---------- Setup ----------
+
+    void Awake()
+    {
+        // Sounds
+        foreach (AudioClip c in Resources.LoadAll<AudioClip>("Audio"))
+            clips[c.name] = c;
+        for (int i = 0; i < 12; i++)
+        {
+            AudioSource s = gameObject.AddComponent<AudioSource>();
+            s.playOnAwake = false;
+            s.spatialBlend = 0f; // 2D sound
+            voices.Add(s);
+        }
+
+        // Debris
+        Mesh cube = GetCubeMesh();
+        redBurst  = MakeBurstSystem("RedBurst",  redMaterial,  cube);
+        goldBurst = MakeBurstSystem("GoldBurst", goldMaterial, cube);
+        cyanBurst = MakeBurstSystem("CyanBurst", cyanMaterial, cube);
+
+        // Screen flash
+        if (canvas != null)
+        {
+            GameObject go = new GameObject("ScreenFlash", typeof(RectTransform), typeof(RawImage));
+            go.transform.SetParent(canvas.transform, false);
+            go.transform.SetAsFirstSibling(); // behind the HUD text
+            RectTransform rt = go.GetComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = rt.offsetMax = Vector2.zero;
+            flash = go.GetComponent<RawImage>();
+            flash.texture = Texture2D.whiteTexture;
+            flash.raycastTarget = false;
+            flash.enabled = false;
+        }
+    }
+
+    void OnEnable()
+    {
+        AutoShooter.OnFired += HandleFired;
+        Enemy.OnAnyEnemyHit += HandleEnemyHit;
+        Enemy.OnAnyEnemyKilled += HandleEnemyKilled;
+        LootTrail.OnPickedUp += HandlePickedUp;
+        LootTrail.OnKnockedOff += HandleKnockedOff;
+        PlayerHealth.OnPlayerDamaged += HandleHurt;
+        PlayerHealth.OnPlayerDied += HandlePlayerDied;
+        EvacManager.OnEvacOpened += HandleEvacOpened;
+        EvacManager.OnEvacMissed += HandleEvacMissed;
+        EvacManager.OnExtracted += HandleExtracted;
+    }
+
+    void OnDisable()
+    {
+        AutoShooter.OnFired -= HandleFired;
+        Enemy.OnAnyEnemyHit -= HandleEnemyHit;
+        Enemy.OnAnyEnemyKilled -= HandleEnemyKilled;
+        LootTrail.OnPickedUp -= HandlePickedUp;
+        LootTrail.OnKnockedOff -= HandleKnockedOff;
+        PlayerHealth.OnPlayerDamaged -= HandleHurt;
+        PlayerHealth.OnPlayerDied -= HandlePlayerDied;
+        EvacManager.OnEvacOpened -= HandleEvacOpened;
+        EvacManager.OnEvacMissed -= HandleEvacMissed;
+        EvacManager.OnExtracted -= HandleExtracted;
+    }
+
+    // ---------- What happens on each event ----------
+
+    void HandleFired(Vector3 muzzle)
+    {
+        // Shooting is constant, so keep it quiet and don't stack sounds.
+        if (Time.time - lastShootSound > 0.06f)
+        {
+            Play("shoot", shootVolume, 0.12f);
+            lastShootSound = Time.time;
+        }
+        Burst(cyanBurst, muzzle, 2, 3f, 0.12f, 0.15f);
+    }
+
+    void HandleEnemyHit(Vector3 pos)
+    {
+        Play("hit", 0.35f, 0.15f);
+        Burst(cyanBurst, pos + Vector3.up * 0.5f, 3, 5f, 0.12f, 0.25f);
+    }
+
+    void HandleEnemyKilled(Vector3 pos)
+    {
+        Play("enemy_die", 0.6f, 0.15f);
+        Burst(redBurst, pos + Vector3.up * 0.4f, 10, 7f, 0.22f, 0.6f);
+        Shake(shakeOnEnemyDeath);
+    }
+
+    void HandlePickedUp(Vector3 pos, int trailLength)
+    {
+        // The pitch climbs as your tail grows - greed you can hear.
+        float pitch = 1f + Mathf.Min(trailLength, 30) * 0.02f;
+        Play("pickup", 0.5f, 0f, pitch);
+        Burst(goldBurst, pos, 4, 3f, 0.12f, 0.35f);
+    }
+
+    void HandleKnockedOff(Vector3 pos)
+    {
+        Play("knock", 0.7f, 0.1f);
+        Burst(goldBurst, pos, 8, 6f, 0.15f, 0.5f);
+    }
+
+    void HandleHurt(float amount)
+    {
+        Play("hurt", 0.8f, 0.1f);
+        Flash(new Color(1f, 0.1f, 0.15f), 0.35f);
+        Shake(shakeOnHurt);
+    }
+
+    void HandlePlayerDied()
+    {
+        Play("death", 1f, 0f);
+        if (cameraFollow != null && cameraFollow.target != null)
+            Burst(redBurst, cameraFollow.target.position + Vector3.up, 30, 10f, 0.3f, 1f);
+        Flash(new Color(1f, 0.1f, 0.15f), 0.6f);
+        Shake(shakeOnDeath);
+    }
+
+    void HandleEvacOpened()
+    {
+        Play("evac_open", 0.9f, 0f);
+        Flash(new Color(1f, 0.7f, 0f), 0.15f);
+        Shake(shakeOnEvacOpen);
+    }
+
+    void HandleEvacMissed()
+    {
+        Play("greed", 1f, 0f);
+        Flash(new Color(0.6f, 0f, 0.1f), 0.3f);
+        Shake(0.2f);
+    }
+
+    void HandleExtracted(Vector3 pos)
+    {
+        Play("extract", 1f, 0f);
+        Burst(goldBurst, pos + Vector3.up, 40, 9f, 0.25f, 1.2f);
+        Flash(new Color(1f, 0.8f, 0.2f), 0.45f);
+        Shake(shakeOnExtract);
+    }
+
+    // ---------- Helpers ----------
+
+    void Update()
+    {
+        // Fade the screen flash (uses real time so it still fades on the frozen end screen).
+        if (flash != null && flashAlpha > 0f)
+        {
+            flashAlpha = Mathf.Max(0f, flashAlpha - 2.5f * Time.unscaledDeltaTime);
+            Color c = flashColor;
+            c.a = flashAlpha;
+            flash.color = c;
+            flash.enabled = flashAlpha > 0.001f;
+        }
+    }
+
+    void Play(string name, float volume, float pitchVariation, float basePitch = 1f)
+    {
+        if (!clips.TryGetValue(name, out AudioClip clip)) return;
+        AudioSource s = voices[nextVoice];
+        nextVoice = (nextVoice + 1) % voices.Count;
+        s.pitch = basePitch + Random.Range(-pitchVariation, pitchVariation);
+        s.PlayOneShot(clip, volume * masterVolume);
+    }
+
+    void Shake(float amount)
+    {
+        if (cameraFollow != null) cameraFollow.Shake(amount);
+    }
+
+    void Flash(Color color, float strength)
+    {
+        if (flash == null) return;
+        flashColor = color;
+        flashAlpha = Mathf.Max(flashAlpha, strength);
+    }
+
+    /// <summary>Throw out a handful of little glowing cubes.</summary>
+    void Burst(ParticleSystem ps, Vector3 pos, int count, float speed, float size, float life)
+    {
+        if (ps == null) return;
+        ParticleSystem.EmitParams p = new ParticleSystem.EmitParams();
+        for (int i = 0; i < count; i++)
+        {
+            Vector3 dir = Random.onUnitSphere;
+            dir.y = Mathf.Abs(dir.y) * 0.8f + 0.2f; // mostly outwards and up
+            p.position = pos;
+            p.velocity = dir.normalized * speed * Random.Range(0.5f, 1f);
+            p.startSize = size * Random.Range(0.7f, 1.3f);
+            p.startLifetime = life * Random.Range(0.7f, 1.2f);
+            p.rotation3D = Random.insideUnitSphere * 180f;
+            ps.Emit(p, 1);
+        }
+    }
+
+    ParticleSystem MakeBurstSystem(string name, Material mat, Mesh mesh)
+    {
+        if (mat == null) return null;
+
+        GameObject go = new GameObject(name);
+        go.transform.SetParent(transform, false);
+        ParticleSystem ps = go.AddComponent<ParticleSystem>();
+        ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
+        var main = ps.main;
+        main.loop = true;
+        main.playOnAwake = false;
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.gravityModifier = 2f;
+        main.maxParticles = 600;
+        main.startSpeed = 0f;
+
+        var emission = ps.emission;
+        emission.enabled = false; // we only emit by hand
+
+        var shape = ps.shape;
+        shape.enabled = false;
+
+        // Shrink to nothing over their life.
+        var sol = ps.sizeOverLifetime;
+        sol.enabled = true;
+        sol.size = new ParticleSystem.MinMaxCurve(1f, AnimationCurve.Linear(0f, 1f, 1f, 0f));
+
+        // Slow down as they fly.
+        var lim = ps.limitVelocityOverLifetime;
+        lim.enabled = true;
+        lim.dampen = 0.15f;
+        lim.limit = 0f;
+
+        var r = go.GetComponent<ParticleSystemRenderer>();
+        r.renderMode = ParticleSystemRenderMode.Mesh;
+        r.mesh = mesh;
+        r.material = mat;
+        r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+
+        ps.Play();
+        return ps;
+    }
+
+    static Mesh GetCubeMesh()
+    {
+        GameObject temp = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        Mesh m = temp.GetComponent<MeshFilter>().sharedMesh;
+        Destroy(temp);
+        return m;
+    }
+}
