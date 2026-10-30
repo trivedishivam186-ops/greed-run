@@ -55,6 +55,7 @@ public class EvacManager : MonoBehaviour
     public static event System.Action OnEvacOpened;
     public static event System.Action OnEvacMissed;
     public static event System.Action<Vector3> OnExtracted;
+    public static event System.Action OnNewBest;
 
     // What the HUD reads.
     public bool IsOpen { get; private set; }
@@ -162,11 +163,18 @@ public class EvacManager : MonoBehaviour
         int stash = Stash.Add(banked);
         Debug.Log($"Extracted! Banked {banked}. Stash now {stash}.");
 
-        if (endScreen != null)
-            endScreen.Show("EXTRACTED",
-                $"BANKED  +{banked}\n" +
-                $"GREED  x{GreedMultiplier:0.0}   ·   EVACS SKIPPED  {EvacsSkipped}\n\n" +
-                $"STASH  {stash}");
+        int wave = spawner != null ? spawner.CurrentWave : 0;
+        bool bestWave = Stash.TryRecordWave(wave);
+        bool bestBank = Stash.TryRecordBank(banked);
+
+        string body =
+            $"BANKED  +{banked}{NewBest(bestBank)}\n" +
+            $"WAVE  {wave}{NewBest(bestWave)}\n" +
+            $"GREED  x{GreedMultiplier:0.0}   ·   EVACS SKIPPED  {EvacsSkipped}\n\n" +
+            Records() + $"\nSTASH  {stash}";
+
+        if (endScreen != null) endScreen.Show(bestBank || bestWave ? "NEW PERSONAL BEST" : "EXTRACTED", body);
+        if (bestBank || bestWave) OnNewBest?.Invoke();
     }
 
     void EndRunDied()
@@ -178,13 +186,23 @@ public class EvacManager : MonoBehaviour
             ? Mathf.RoundToInt(Mathf.Max(lootTrail.AtRisk, lootTrail.LostOnDeath) * GreedMultiplier)
             : 0;
 
+        int wave = spawner != null ? spawner.CurrentWave : 0;
+        bool bestWave = Stash.TryRecordWave(wave);
+
         string body = $"LOST  {lost}\n";
+        body += $"WAVE  {wave}{NewBest(bestWave)}\n";
         if (EvacsSkipped > 0 && bankableAtLastEvac > 0)
             body += $"If you'd left at the last evac, you'd have banked {bankableAtLastEvac}.\n";
-        body += $"\nSTASH  {Stash.Total}";
+        body += "\n" + Records() + $"\nSTASH  {Stash.Total}";
 
         if (endScreen != null) endScreen.Show("YOU WERE OVERRUN", body);
+        if (bestWave) OnNewBest?.Invoke();
     }
+
+    static string NewBest(bool isNew) => isNew ? "  <color=#00E5FF>NEW BEST!</color>" : "";
+
+    static string Records() =>
+        $"<size=80%><color=#9AA4B2>BEST WAVE  {Stash.BestWave}   ·   BEST BANK  {Stash.BestBank}</color></size>";
 
     Vector3 PickPadPosition()
     {

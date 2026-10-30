@@ -132,6 +132,7 @@ public class GameFeel : MonoBehaviour
         EvacManager.OnExtracted += HandleExtracted;
         LevelUpSystem.OnLevelUp += HandleLevelUp;
         NukePickup.OnNuke += HandleNuke;
+        EvacManager.OnNewBest += HandleNewBest;
         EnemySpawner.OnWaveStarted += HandleWaveStarted;
         EnemySpawner.OnWaveCleared += HandleWaveCleared;
     }
@@ -150,8 +151,14 @@ public class GameFeel : MonoBehaviour
         EvacManager.OnExtracted -= HandleExtracted;
         LevelUpSystem.OnLevelUp -= HandleLevelUp;
         NukePickup.OnNuke -= HandleNuke;
+        EvacManager.OnNewBest -= HandleNewBest;
         EnemySpawner.OnWaveStarted -= HandleWaveStarted;
         EnemySpawner.OnWaveCleared -= HandleWaveCleared;
+    }
+
+    void HandleNewBest()
+    {
+        Play("levelup", 0.8f, 0f, 1.25f);
     }
 
     void HandleNuke(Vector3 pos, int killed)

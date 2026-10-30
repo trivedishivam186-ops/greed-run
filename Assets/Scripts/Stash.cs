@@ -7,6 +7,32 @@ using UnityEngine;
 public static class Stash
 {
     const string Key = "GreedRun_Stash";
+    const string BestWaveKey = "GreedRun_BestWave";
+    const string BestBankKey = "GreedRun_BestBank";
+
+    /// <summary>Highest wave ever reached (extracted or not).</summary>
+    public static int BestWave => PlayerPrefs.GetInt(BestWaveKey, 0);
+
+    /// <summary>Most loot ever banked in a single run.</summary>
+    public static int BestBank => PlayerPrefs.GetInt(BestBankKey, 0);
+
+    /// <summary>Saves the wave if it's a new record. Returns true if it was.</summary>
+    public static bool TryRecordWave(int wave)
+    {
+        if (wave <= BestWave) return false;
+        PlayerPrefs.SetInt(BestWaveKey, wave);
+        PlayerPrefs.Save();
+        return true;
+    }
+
+    /// <summary>Saves the banked amount if it's a new record. Returns true if it was.</summary>
+    public static bool TryRecordBank(int amount)
+    {
+        if (amount <= BestBank) return false;
+        PlayerPrefs.SetInt(BestBankKey, amount);
+        PlayerPrefs.Save();
+        return true;
+    }
 
     public static int Total => PlayerPrefs.GetInt(Key, 0);
 

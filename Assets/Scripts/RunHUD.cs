@@ -38,7 +38,11 @@ public class RunHUD : MonoBehaviour
             }
             else
             {
-                waveText.text = $"WAVE {spawner.CurrentWave}\n<size=70%>{spawner.EnemiesRemaining} LEFT</size>";
+                // Once you pass your best wave, the HUD tells you - a reason to keep going.
+                string best = Stash.BestWave > 0
+                    ? (spawner.CurrentWave > Stash.BestWave ? "  <color=#00E5FF>NEW BEST</color>" : $"  ·  BEST {Stash.BestWave}")
+                    : "";
+                waveText.text = $"WAVE {spawner.CurrentWave}\n<size=70%>{spawner.EnemiesRemaining} LEFT{best}</size>";
             }
         }
 
