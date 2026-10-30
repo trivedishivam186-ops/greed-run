@@ -6,7 +6,7 @@ A survivor-like with an extraction twist, built as a prototype for the Lila Game
 
 - **Engine:** Unity 6.6 (6000.6.5f1), Web build
 - **Play in browser:** https://greed-run-game.netlify.app
-- **Status:** in development
+- **Status:** in development – core loop, level-ups, waves, nuke, stash shop and personal bests playable
 
 ## Project layout
 
