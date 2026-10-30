@@ -28,12 +28,49 @@ public class Enemy : MonoBehaviour
     [Tooltip("How strongly enemies push apart. 0 = they all overlap.")]
     public float separationStrength = 3f;
 
+    [Header("Health (designer knobs)")]
+    [Tooltip("How much damage it takes to kill. The player's bullets do 10, so 20 = two hits.")]
+    public float maxHealth = 20f;
+
+    [Tooltip("How much it swells for a moment when hit (0.3 = 30% bigger). Makes hits feel punchy.")]
+    public float hitPunch = 0.3f;
+
     // Every enemy alive, so they can avoid each other and the spawner can count them.
     public static readonly List<Enemy> All = new List<Enemy>();
+
+    /// <summary>Fires whenever any enemy dies, with the spot where it died. Loot will listen to this.</summary>
+    public static event System.Action<Vector3> OnAnyEnemyKilled;
+
+    public bool IsDead { get; private set; }
 
     Transform player;
     PlayerHealth playerHealth;
     float nextHitTime;
+    float health;
+    Vector3 baseScale;
+    float punchTimer;
+
+    void Awake()
+    {
+        health = maxHealth;
+        baseScale = transform.localScale;
+    }
+
+    /// <summary>Called by bullets when they hit this enemy.</summary>
+    public void TakeDamage(float amount)
+    {
+        if (IsDead) return;
+
+        health -= amount;
+        punchTimer = 0.1f; // swell briefly
+
+        if (health <= 0f)
+        {
+            IsDead = true;
+            OnAnyEnemyKilled?.Invoke(transform.position);
+            Destroy(gameObject);
+        }
+    }
 
     /// <summary>Called by the spawner right after creating this enemy.</summary>
     public void Init(Transform playerTransform, PlayerHealth health, float speedMultiplier)
@@ -48,7 +85,15 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
-        if (player == null) return;
+        // Hit "punch": swell for a split second after being hit, then shrink back.
+        if (punchTimer > 0f)
+        {
+            punchTimer -= Time.deltaTime;
+            float t = Mathf.Clamp01(punchTimer / 0.1f);
+            transform.localScale = baseScale * (1f + hitPunch * t);
+        }
+
+        if (player == null || IsDead) return;
 
         Vector3 toPlayer = player.position - transform.position;
         toPlayer.y = 0f;
