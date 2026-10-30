@@ -32,6 +32,9 @@ public class AutoShooter : MonoBehaviour
     [Tooltip("Height bullets fire from (roughly the robot's chest).")]
     public float muzzleHeight = 1f;
 
+    /// <summary>Fires every time the gun shoots, with the muzzle position.</summary>
+    public static event System.Action<Vector3> OnFired;
+
     PlayerHealth health;
     float cooldown;
 
@@ -83,6 +86,8 @@ public class AutoShooter : MonoBehaviour
         Vector3 aim = target.transform.position - transform.position;
         aim.y = 0f;
         aim.Normalize();
+
+        OnFired?.Invoke(origin);
 
         int count = Mathf.Max(1, projectilesPerShot);
         for (int i = 0; i < count; i++)

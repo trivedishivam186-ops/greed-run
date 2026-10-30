@@ -16,14 +16,38 @@ public class CameraFollow : MonoBehaviour
     [Range(0f, 0.5f)]
     public float smoothTime = 0.15f;
 
+    [Header("Screen shake (designer knobs)")]
+    [Tooltip("Biggest shake distance at full strength.")]
+    public float maxShake = 0.6f;
+
+    [Tooltip("How quickly shake fades (strength lost per second).")]
+    public float shakeDecay = 2.5f;
+
     Vector3 velocity;
+    float trauma;            // 0..1, how hard we're shaking right now
+    Vector3 shakeOffset;
+
+    /// <summary>Add some shake. 0.1 = tiny bump, 0.4 = big hit, 1 = huge.</summary>
+    public void Shake(float amount)
+    {
+        trauma = Mathf.Clamp01(trauma + amount);
+    }
 
     // LateUpdate runs after the player has moved this frame, so the camera never lags a frame behind.
     void LateUpdate()
     {
         if (target == null) return;
 
+        // Follow without the shake, then add the shake on top, so shaking never drifts the camera.
+        Vector3 basePos = transform.position - shakeOffset;
         Vector3 desired = target.position + offset;
-        transform.position = Vector3.SmoothDamp(transform.position, desired, ref velocity, smoothTime);
+        basePos = Vector3.SmoothDamp(basePos, desired, ref velocity, smoothTime);
+
+        // Shake strength is trauma squared: small bumps stay subtle, big hits really kick.
+        trauma = Mathf.Max(0f, trauma - shakeDecay * Time.unscaledDeltaTime);
+        float s = trauma * trauma * maxShake;
+        shakeOffset = new Vector3(Random.Range(-1f, 1f), 0f, Random.Range(-1f, 1f)) * s;
+
+        transform.position = basePos + shakeOffset;
     }
 }

@@ -53,6 +53,12 @@ public class LootTrail : MonoBehaviour
     /// <summary>What the tail was worth at the moment you died (before multipliers).</summary>
     public int LostOnDeath { get; private set; }
 
+    /// <summary>Fires when a core is picked up: where, and how long the tail is now.</summary>
+    public static event System.Action<Vector3, int> OnPickedUp;
+
+    /// <summary>Fires when an enemy knocks a core off the tail.</summary>
+    public static event System.Action<Vector3> OnKnockedOff;
+
     PlayerHealth health;
     float nextKnockTime;
     bool lostOnDeath;
@@ -88,6 +94,7 @@ public class LootTrail : MonoBehaviour
             {
                 c.JoinTrail();
                 Cores.Add(c); // newest cores go on the end of the tail
+                OnPickedUp?.Invoke(c.transform.position, Cores.Count);
             }
         }
     }
@@ -148,6 +155,7 @@ public class LootTrail : MonoBehaviour
     {
         LootCore c = Cores[index];
         Cores.RemoveAt(index);
+        OnKnockedOff?.Invoke(c.transform.position);
         c.DropOnFloor(c.transform.position, knockScatter, repickDelay);
     }
 

@@ -41,6 +41,9 @@ public class Enemy : MonoBehaviour
     /// <summary>Fires whenever any enemy dies, with the spot where it died. Loot will listen to this.</summary>
     public static event System.Action<Vector3> OnAnyEnemyKilled;
 
+    /// <summary>Fires whenever any enemy is hit (for sparks and sounds).</summary>
+    public static event System.Action<Vector3> OnAnyEnemyHit;
+
     public bool IsDead { get; private set; }
 
     Transform player;
@@ -63,6 +66,7 @@ public class Enemy : MonoBehaviour
 
         health -= amount;
         punchTimer = 0.1f; // swell briefly
+        if (health > 0f) OnAnyEnemyHit?.Invoke(transform.position);
 
         if (health <= 0f)
         {

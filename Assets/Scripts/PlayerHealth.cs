@@ -18,6 +18,12 @@ public class PlayerHealth : MonoBehaviour
     [Tooltip("Seconds to wait after dying before the run restarts (only if Auto Restart is ticked).")]
     public float restartDelay = 1.5f;
 
+    /// <summary>Fires when the player takes damage (for screen flash, shake and sound).</summary>
+    public static event System.Action<float> OnPlayerDamaged;
+
+    /// <summary>Fires once when the player dies.</summary>
+    public static event System.Action OnPlayerDied;
+
     public float CurrentHealth { get; private set; }
     public bool IsDead { get; private set; }
 
@@ -35,12 +41,15 @@ public class PlayerHealth : MonoBehaviour
 
         if (CurrentHealth <= 0f)
             Die();
+        else
+            OnPlayerDamaged?.Invoke(amount);
     }
 
     void Die()
     {
         IsDead = true;
         Debug.Log("Player died.");
+        OnPlayerDied?.Invoke();
 
         // Stop the player moving.
         PlayerController controller = GetComponent<PlayerController>();

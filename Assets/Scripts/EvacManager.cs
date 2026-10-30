@@ -51,6 +51,11 @@ public class EvacManager : MonoBehaviour
     [Tooltip("Waves the horde jumps ahead every time you let an evac close.")]
     public int wavesPerSkip = 1;
 
+    // Events for sounds and effects.
+    public static event System.Action OnEvacOpened;
+    public static event System.Action OnEvacMissed;
+    public static event System.Action<Vector3> OnExtracted;
+
     // What the HUD reads.
     public bool IsOpen { get; private set; }
     public float TimeLeftOpen { get; private set; }
@@ -127,6 +132,7 @@ public class EvacManager : MonoBehaviour
             evacPad.gameObject.SetActive(true);
         }
         Debug.Log("EVAC OPEN - extract or stay?");
+        OnEvacOpened?.Invoke();
     }
 
     void CloseSkipped()
@@ -141,6 +147,7 @@ public class EvacManager : MonoBehaviour
 
         TimeUntilOpen = timeBetweenEvacs;
         Debug.Log($"Evac missed. Greed x{GreedMultiplier}");
+        OnEvacMissed?.Invoke();
     }
 
     void Extract()
@@ -149,6 +156,7 @@ public class EvacManager : MonoBehaviour
         IsOpen = false;
 
         int banked = AtRiskWithGreed;
+        OnExtracted?.Invoke(player.transform.position);
         if (lootTrail != null) lootTrail.BankAll();
 
         int stash = Stash.Add(banked);
