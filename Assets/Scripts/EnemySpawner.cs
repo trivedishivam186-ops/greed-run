@@ -75,6 +75,13 @@ public class EnemySpawner : MonoBehaviour
         }
     }
 
+    /// <summary>Jump the difficulty forward (used when the player skips an evac).</summary>
+    public void AddWaves(int count)
+    {
+        CurrentWave += count;
+        Debug.Log($"Greed! Jumped to wave {CurrentWave}");
+    }
+
     void SpawnOne()
     {
         // Pick a random point on the square just outside the arena.

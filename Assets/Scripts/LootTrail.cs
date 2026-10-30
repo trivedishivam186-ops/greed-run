@@ -50,6 +50,9 @@ public class LootTrail : MonoBehaviour
         }
     }
 
+    /// <summary>What the tail was worth at the moment you died (before multipliers).</summary>
+    public int LostOnDeath { get; private set; }
+
     PlayerHealth health;
     float nextKnockTime;
     bool lostOnDeath;
@@ -162,6 +165,7 @@ public class LootTrail : MonoBehaviour
     {
         lostOnDeath = true;
         int lost = AtRisk;
+        LostOnDeath = lost;
         for (int i = 0; i < Cores.Count; i++)
             if (Cores[i] != null) Destroy(Cores[i].gameObject);
         Cores.Clear();

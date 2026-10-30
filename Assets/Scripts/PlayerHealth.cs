@@ -12,7 +12,10 @@ public class PlayerHealth : MonoBehaviour
     [Header("Health (designer knobs)")]
     public float maxHealth = 100f;
 
-    [Tooltip("Seconds to wait after dying before the run restarts.")]
+    [Tooltip("If ticked, the run restarts by itself after dying. Leave unticked when a RunEndScreen handles restarting.")]
+    public bool autoRestart = false;
+
+    [Tooltip("Seconds to wait after dying before the run restarts (only if Auto Restart is ticked).")]
     public float restartDelay = 1.5f;
 
     public float CurrentHealth { get; private set; }
@@ -37,13 +40,13 @@ public class PlayerHealth : MonoBehaviour
     void Die()
     {
         IsDead = true;
-        Debug.Log("Player died. Restarting...");
+        Debug.Log("Player died.");
 
         // Stop the player moving.
         PlayerController controller = GetComponent<PlayerController>();
         if (controller != null) controller.enabled = false;
 
-        StartCoroutine(RestartAfterDelay());
+        if (autoRestart) StartCoroutine(RestartAfterDelay());
     }
 
     IEnumerator RestartAfterDelay()
