@@ -14,6 +14,10 @@ public class LootDropper : MonoBehaviour
     [Range(0f, 1f)]
     public float dropChance = 0.7f;
 
+    [Tooltip("Drop chance for enemies killed by a nuke. A nuke on a big horde = a pile of loot to grab (and protect).")]
+    [Range(0f, 1f)]
+    public float nukeDropChance = 0.35f;
+
     [Tooltip("How far the core slides away from where the enemy died.")]
     public float scatterDistance = 0.8f;
 
@@ -23,7 +27,8 @@ public class LootDropper : MonoBehaviour
     void HandleEnemyKilled(Vector3 position)
     {
         if (lootPrefab == null) return;
-        if (Random.value > dropChance) return;
+        float chance = Enemy.NukeInProgress ? nukeDropChance : dropChance;
+        if (Random.value > chance) return;
 
         LootCore core = Instantiate(lootPrefab);
         core.DropOnFloor(position, scatterDistance, 0f);

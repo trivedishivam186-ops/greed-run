@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -17,9 +18,13 @@ public class Projectile : MonoBehaviour
     float damage;
     float age;
 
+    int pierceLeft;
+    readonly HashSet<Enemy> alreadyHit = new HashSet<Enemy>();
+
     /// <summary>Called by the AutoShooter right after creating the bullet.</summary>
-    public void Launch(Vector3 dir, float projectileSpeed, float projectileDamage)
+    public void Launch(Vector3 dir, float projectileSpeed, float projectileDamage, int pierce = 0)
     {
+        pierceLeft = pierce;
         direction = dir;
         speed = projectileSpeed;
         damage = projectileDamage;
@@ -41,12 +46,14 @@ public class Projectile : MonoBehaviour
         for (int i = 0; i < Enemy.All.Count; i++)
         {
             Enemy e = Enemy.All[i];
-            if (e == null || e.IsDead) continue;
+            if (e == null || e.IsDead || alreadyHit.Contains(e)) continue;
             Vector3 diff = e.transform.position - transform.position;
             diff.y = 0f;
             if (diff.sqrMagnitude < hitRadiusSq)
             {
                 e.TakeDamage(damage);
+                alreadyHit.Add(e);
+                if (pierceLeft > 0) { pierceLeft--; continue; } // flies on through
                 Destroy(gameObject);
                 return;
             }

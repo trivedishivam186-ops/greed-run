@@ -29,6 +29,9 @@ public class AutoShooter : MonoBehaviour
     [Tooltip("Total angle of the spread in degrees (only matters with more than 1 bullet).")]
     public float spreadAngle = 20f;
 
+    [Tooltip("How many extra enemies each bullet passes through.")]
+    public int pierce = 0;
+
     [Tooltip("Height bullets fire from (roughly the robot's chest).")]
     public float muzzleHeight = 1f;
 
@@ -97,7 +100,7 @@ public class AutoShooter : MonoBehaviour
             Vector3 dir = Quaternion.Euler(0f, angle, 0f) * aim;
 
             Projectile p = Instantiate(projectilePrefab, origin, Quaternion.LookRotation(dir, Vector3.up));
-            p.Launch(dir, projectileSpeed, damage);
+            p.Launch(dir, projectileSpeed, damage, pierce);
         }
     }
 }

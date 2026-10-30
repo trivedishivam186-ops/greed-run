@@ -131,6 +131,9 @@ public class GameFeel : MonoBehaviour
         EvacManager.OnEvacMissed += HandleEvacMissed;
         EvacManager.OnExtracted += HandleExtracted;
         LevelUpSystem.OnLevelUp += HandleLevelUp;
+        NukePickup.OnNuke += HandleNuke;
+        EnemySpawner.OnWaveStarted += HandleWaveStarted;
+        EnemySpawner.OnWaveCleared += HandleWaveCleared;
     }
 
     void OnDisable()
@@ -146,6 +149,26 @@ public class GameFeel : MonoBehaviour
         EvacManager.OnEvacMissed -= HandleEvacMissed;
         EvacManager.OnExtracted -= HandleExtracted;
         LevelUpSystem.OnLevelUp -= HandleLevelUp;
+        NukePickup.OnNuke -= HandleNuke;
+        EnemySpawner.OnWaveStarted -= HandleWaveStarted;
+        EnemySpawner.OnWaveCleared -= HandleWaveCleared;
+    }
+
+    void HandleNuke(Vector3 pos, int killed)
+    {
+        Play("nuke", 1f, 0f);
+        Flash(Color.white, 0.9f);
+        Shake(1f);
+    }
+
+    void HandleWaveStarted(int wave)
+    {
+        if (wave > 1) Play("wave_start", 0.6f, 0f);
+    }
+
+    void HandleWaveCleared(int wave)
+    {
+        Play("wave_clear", 0.7f, 0f);
     }
 
     void HandleLevelUp()
@@ -175,6 +198,12 @@ public class GameFeel : MonoBehaviour
 
     void HandleEnemyKilled(Vector3 pos)
     {
+        if (Enemy.NukeInProgress)
+        {
+            // A nuke kills everything at once: debris only, the nuke has its own sound and shake.
+            Burst(redBurst, pos + Vector3.up * 0.4f, 4, 7f, 0.22f, 0.6f);
+            return;
+        }
         Play("enemy_die", 0.6f, 0.15f);
         Burst(redBurst, pos + Vector3.up * 0.4f, 10, 7f, 0.22f, 0.6f);
         Shake(shakeOnEnemyDeath);
