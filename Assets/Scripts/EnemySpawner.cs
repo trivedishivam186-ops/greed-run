@@ -76,6 +76,25 @@ public class EnemySpawner : MonoBehaviour
     [Tooltip("Each wave, enemies walk this much faster (0.05 = +5%).")]
     public float speedIncreasePerWave = 0.05f;
 
+    [Tooltip("Each wave, enemies get this much more health (0.12 = +12%). Keeps later waves a real threat.")]
+    public float healthIncreasePerWave = 0.12f;
+
+    [Tooltip("Each wave, enemies hit this much harder (0.05 = +5%).")]
+    public float damageIncreasePerWave = 0.05f;
+
+    [Header("Boss (designer knobs)")]
+    [Tooltip("The boss prefab. Leave empty for no boss.")]
+    public Enemy bossPrefab;
+
+    [Tooltip("A boss arrives every this many waves (5 = waves 5, 10, 15...).")]
+    public int bossEvery = 5;
+
+    [Tooltip("On boss waves, normal enemies are cut to this share (0.5 = half) so the boss is the star.")]
+    [Range(0f, 1f)] public float bossWaveEnemyShare = 0.5f;
+
+    [Tooltip("Each boss after the first gets this much more health (0.5 = +50%).")]
+    public float bossHealthIncrease = 0.5f;
+
     [Tooltip("Never more than this many enemies alive at once (keeps phones running smoothly).")]
     public int maxAlive = 150;
 
@@ -146,6 +165,12 @@ public class EnemySpawner : MonoBehaviour
         toSpawn = firstWaveEnemies + extraEnemiesPerWave * (wave - 1);
         spawnTimer = 0f;
         State = WaveState.Spawning;
+
+        if (bossPrefab != null && bossEvery > 0 && wave % bossEvery == 0)
+        {
+            toSpawn = Mathf.RoundToInt(toSpawn * bossWaveEnemyShare);
+            SpawnBoss(wave / bossEvery);
+        }
         Debug.Log($"Wave {CurrentWave}: {toSpawn} enemies");
         OnWaveStarted?.Invoke(CurrentWave);
     }
@@ -163,6 +188,20 @@ public class EnemySpawner : MonoBehaviour
             State = WaveState.Spawning;
         }
         Debug.Log($"Greed! Jumped to wave {CurrentWave}");
+    }
+
+    float SpeedMult()  => 1f + speedIncreasePerWave * (CurrentWave - 1);
+    float HealthMult() => 1f + healthIncreasePerWave * (CurrentWave - 1);
+    float DamageMult() => 1f + damageIncreasePerWave * (CurrentWave - 1);
+
+    void SpawnBoss(int bossNumber)
+    {
+        // Comes in from the top edge, the furthest side from where the camera looks.
+        Vector3 pos = new Vector3(Random.Range(-15f, 15f), 0f, spawnDistance);
+        Enemy b = Instantiate(bossPrefab, pos, Quaternion.identity);
+        float extra = 1f + bossHealthIncrease * (bossNumber - 1);
+        b.Init(player.transform, player, 1f, extra, DamageMult());
+        Debug.Log($"BOSS #{bossNumber} incoming!");
     }
 
     /// <summary>Choose which enemy to spawn, based on the wave number.</summary>
@@ -206,7 +245,6 @@ public class EnemySpawner : MonoBehaviour
         }
 
         Enemy e = Instantiate(PickType(), pos, Quaternion.identity);
-        float speedMultiplier = 1f + speedIncreasePerWave * (CurrentWave - 1);
-        e.Init(player.transform, player, speedMultiplier);
+        e.Init(player.transform, player, SpeedMult(), HealthMult(), DamageMult());
     }
 }

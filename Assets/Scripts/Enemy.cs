@@ -35,6 +35,9 @@ public class Enemy : MonoBehaviour
     [Tooltip("How much it swells for a moment when hit (0.3 = 30% bigger). Makes hits feel punchy.")]
     public float hitPunch = 0.3f;
 
+    [Tooltip("Share of its max health a nuke takes away (1 = nukes kill it, 0.25 = a boss loses a quarter).")]
+    [Range(0f, 1f)] public float nukeDamageFraction = 1f;
+
     [Header("Behaviour")]
     [Tooltip("Does touching the player hurt them? (The Collector turns this off while it hunts your loot.)")]
     public bool hurtsPlayer = true;
@@ -71,8 +74,9 @@ public class Enemy : MonoBehaviour
         foreach (Enemy e in copy)
         {
             if (e == null || e.IsDead) continue;
-            e.TakeDamage(float.MaxValue);
-            killed++;
+            if (e.nukeDamageFraction >= 1f) e.TakeDamage(float.MaxValue);
+            else e.TakeDamage(e.maxHealth * e.nukeDamageFraction);
+            if (e.IsDead) killed++;
         }
         NukeInProgress = false;
         return killed;
@@ -110,12 +114,18 @@ public class Enemy : MonoBehaviour
     }
 
     /// <summary>Called by the spawner right after creating this enemy.</summary>
-    public void Init(Transform playerTransform, PlayerHealth health, float speedMultiplier)
+    public void Init(Transform playerTransform, PlayerHealth health, float speedMultiplier, float healthMultiplier = 1f, float damageMultiplier = 1f)
     {
         player = playerTransform;
         playerHealth = health;
         moveSpeed *= speedMultiplier;
+        maxHealth *= healthMultiplier;
+        this.health = maxHealth;
+        contactDamage *= damageMultiplier;
     }
+
+    /// <summary>Health left, 0..1 (for the boss health bar).</summary>
+    public float Health01 => maxHealth > 0f ? Mathf.Clamp01(health / maxHealth) : 0f;
 
     void OnEnable()  { All.Add(this); }
     void OnDisable() { All.Remove(this); }
