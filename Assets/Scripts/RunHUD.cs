@@ -22,8 +22,20 @@ public class RunHUD : MonoBehaviour
     [Tooltip("The big banner text in the middle-top of the screen.")]
     public TMP_Text evacText;
 
+    bool hudHidden;
+
     void Update()
     {
+        // Hide the in-run HUD while the start screen is up, so it doesn't show through.
+        bool hide = StashShop.InMenu;
+        if (hide != hudHidden)
+        {
+            hudHidden = hide;
+            foreach (TMP_Text t in new[] { healthText, waveText, atRiskText, greedText, evacText })
+                if (t != null) t.enabled = !hide;
+        }
+        if (hide) return;
+
         if (healthText != null && playerHealth != null)
             healthText.text = $"HP {Mathf.CeilToInt(playerHealth.CurrentHealth)}";
 

@@ -159,7 +159,7 @@ public class StashShop : MonoBehaviour
             ? "Standard enemies and loot"
             : $"Enemies +{Mathf.RoundToInt(threatEnemyBonusPerLevel * (t - 1) * 100)}%   ·   Loot x{Threat.LootMultiplier:0.0}";
         string unlock = Threat.Unlocked < Threat.MaxLevel
-            ? $"\n<size=75%><color=#9AA4B2>Unlock Threat {Threat.Unlocked + 1}: extract after wave {Threat.UnlockWave} on Threat {Threat.Unlocked}</color></size>"
+            ? $"\n<size=65%><color=#9AA4B2>Unlock T{Threat.Unlocked + 1}: reach wave {Threat.UnlockWave} on T{Threat.Unlocked} and extract</color></size>"
             : "";
         threatText.text = $"<color=#FF3C50>THREAT LEVEL {t}</color>\n<size=70%>{effect}</size>{unlock}";
         threatDown.SetActive(t > 1);
@@ -171,8 +171,9 @@ public class StashShop : MonoBehaviour
         for (int i = 0; i < upgrades.Count && i < rowTitles.Count; i++)
         {
             ShopUpgrade u = upgrades[i];
-            rowTitles[i].text = $"{u.title}  <size=70%><color=#00E5FF>LV {u.Level}/{u.maxLevel}</color></size>";
-            rowDescs[i].text = u.description;
+            // Level goes on the description line, so long titles never wrap.
+            rowTitles[i].text = u.title;
+            rowDescs[i].text = $"{u.description}   <color=#00E5FF>LV {u.Level}/{u.maxLevel}</color>";
 
             if (u.IsMaxed)
             {
@@ -203,7 +204,7 @@ public class StashShop : MonoBehaviour
     {
         RectTransform s = NewRect("StartScreen", canvas.transform);
         Stretch(s);
-        AddImage(s, new Color(0.01f, 0.02f, 0.04f, 0.92f)).raycastTarget = true;
+        AddImage(s, new Color(0.01f, 0.02f, 0.04f, 0.97f)).raycastTarget = true;
         screen = s.gameObject;
 
         Text("Title", s, "GREED RUN", 66, Gold, FontStyles.Bold, new Vector2(0, 380), new Vector2(520, 90));
