@@ -38,3 +38,13 @@ Notes from playing the prototype, and what was changed because of them. Used for
 |---|---|---|---|
 | 1 | Shop works and extracting now feels rewarding | Banked loot finally has a use – the run → bank → upgrade loop is complete | Keep |
 | 2 | Difficulty is about right for now, but if I play well, surviving becomes easy | One enemy type means one answer: once your build handles the swarm, nothing new tests you | **Planned:** more enemy types (fast and tanky) and the Collector, an AI-Director enemy that targets greedy players' loot |
+
+## Playtest 4 – Sun 1 Nov (me, in editor)
+
+**Build:** + Runner and Brute enemies, Collector enemy sent by a rule-based "AI Director".
+
+| # | What I noticed | Why it matters | What I changed |
+|---|---|---|---|
+| 1 | Still too easy, even with Runners and Brutes | Enemy types differed in style, but not in threat – and none of them got tougher over time | Enemies now get +12% health and +5% damage every wave, and each type is a clear step up (Grunt < Runner < Brute < Boss) |
+| 2 | The Collector didn't work: fast, small and weak, and losing ~80 loot to it felt like nothing | A threat has to be scary *relative to what you're carrying*; a small thief isn't | **Cut the Collector.** Replaced with a **Titan boss every 5th wave** (reference: Helldivers 2) – big health bar, a telegraphed charge attack, drops a big loot pile when killed |
+| 3 | I'd rather see that I'm carrying loot than drag a trail | The trail got long and noisy; what matters is "you have it, you lose it if you die" | Loot now **orbits the robot** (up to 10 cores visible; the orbit spins faster the richer you are). Enemies no longer knock loot off – it's only lost on death, and the Black Box saves part of it |
