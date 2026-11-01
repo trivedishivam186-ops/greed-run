@@ -135,6 +135,8 @@ public class GameFeel : MonoBehaviour
         EvacManager.OnNewBest += HandleNewBest;
         StashShop.OnPurchased += HandlePurchased;
         StashShop.OnDeploy += HandleDeploy;
+        CollectorDirector.OnCollectorSent += HandleCollectorSent;
+        Collector.OnEscaped += HandleCollectorEscaped;
         EnemySpawner.OnWaveStarted += HandleWaveStarted;
         EnemySpawner.OnWaveCleared += HandleWaveCleared;
     }
@@ -156,8 +158,23 @@ public class GameFeel : MonoBehaviour
         EvacManager.OnNewBest -= HandleNewBest;
         StashShop.OnPurchased -= HandlePurchased;
         StashShop.OnDeploy -= HandleDeploy;
+        CollectorDirector.OnCollectorSent -= HandleCollectorSent;
+        Collector.OnEscaped -= HandleCollectorEscaped;
         EnemySpawner.OnWaveStarted -= HandleWaveStarted;
         EnemySpawner.OnWaveCleared -= HandleWaveCleared;
+    }
+
+    void HandleCollectorSent()
+    {
+        Play("greed", 1f, 0f, 1.3f);
+        Flash(new Color(0.7f, 0.2f, 1f), 0.3f);
+        Shake(0.2f);
+    }
+
+    void HandleCollectorEscaped(int lost)
+    {
+        Play("knock", 0.9f, 0f, 0.7f);
+        Flash(new Color(0.7f, 0.2f, 1f), 0.4f);
     }
 
     void HandlePurchased()

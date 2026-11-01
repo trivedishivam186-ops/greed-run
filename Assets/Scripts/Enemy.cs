@@ -35,6 +35,19 @@ public class Enemy : MonoBehaviour
     [Tooltip("How much it swells for a moment when hit (0.3 = 30% bigger). Makes hits feel punchy.")]
     public float hitPunch = 0.3f;
 
+    [Header("Behaviour")]
+    [Tooltip("Does touching the player hurt them? (The Collector turns this off while it hunts your loot.)")]
+    public bool hurtsPlayer = true;
+
+    [Tooltip("Does touching your loot tail knock cores off? (The Collector steals instead.)")]
+    public bool knocksLoot = true;
+
+    /// <summary>If set, the enemy walks towards this instead of the player.</summary>
+    [HideInInspector] public Transform chaseTarget;
+
+    /// <summary>Fires when this particular enemy dies.</summary>
+    public event System.Action<Enemy> OnDied;
+
     // Every enemy alive, so they can avoid each other and the spawner can count them.
     public static readonly List<Enemy> All = new List<Enemy>();
 
@@ -90,6 +103,7 @@ public class Enemy : MonoBehaviour
         if (health <= 0f)
         {
             IsDead = true;
+            OnDied?.Invoke(this);
             OnAnyEnemyKilled?.Invoke(transform.position);
             Destroy(gameObject);
         }
@@ -122,8 +136,15 @@ public class Enemy : MonoBehaviour
         toPlayer.y = 0f;
         float distance = toPlayer.magnitude;
 
-        // 1. Walk towards the player.
-        Vector3 move = distance > 0.01f ? toPlayer / distance : Vector3.zero;
+        // 1. Walk towards the player (or a special target, e.g. the Collector chasing your loot).
+        Vector3 toTarget = toPlayer;
+        if (chaseTarget != null)
+        {
+            toTarget = chaseTarget.position - transform.position;
+            toTarget.y = 0f;
+        }
+        float targetDist = toTarget.magnitude;
+        Vector3 move = targetDist > 0.01f ? toTarget / targetDist : Vector3.zero;
 
         // 2. Push away from nearby enemies.
         Vector3 push = Vector3.zero;
@@ -144,11 +165,11 @@ public class Enemy : MonoBehaviour
         transform.position += move * moveSpeed * Time.deltaTime;
 
         // Face the player.
-        if (distance > 0.01f)
-            transform.rotation = Quaternion.LookRotation(toPlayer, Vector3.up);
+        if (targetDist > 0.01f)
+            transform.rotation = Quaternion.LookRotation(toTarget, Vector3.up);
 
         // 3. Hurt the player when touching.
-        if (distance < contactRadius && Time.time >= nextHitTime && playerHealth != null)
+        if (hurtsPlayer && distance < contactRadius && Time.time >= nextHitTime && playerHealth != null)
         {
             playerHealth.TakeDamage(contactDamage);
             nextHitTime = Time.time + hitCooldown;

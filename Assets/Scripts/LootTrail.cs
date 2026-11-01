@@ -152,7 +152,7 @@ public class LootTrail : MonoBehaviour
             for (int j = 0; j < Enemy.All.Count; j++)
             {
                 Enemy e = Enemy.All[j];
-                if (e == null || e.IsDead) continue;
+                if (e == null || e.IsDead || !e.knocksLoot) continue;
                 Vector3 d = e.transform.position - cp;
                 d.y = 0f;
                 if (d.sqrMagnitude < rSq)
@@ -171,6 +171,29 @@ public class LootTrail : MonoBehaviour
         Cores.RemoveAt(index);
         OnKnockedOff?.Invoke(c.transform.position);
         c.DropOnFloor(c.transform.position, knockScatter, repickDelay);
+    }
+
+    /// <summary>The core in the tail closest to a point (used by the Collector to pick its target).</summary>
+    public LootCore NearestCore(Vector3 pos)
+    {
+        LootCore best = null;
+        float bestSq = float.MaxValue;
+        foreach (LootCore c in Cores)
+        {
+            if (c == null) continue;
+            float dSq = (c.transform.position - pos).sqrMagnitude;
+            if (dSq < bestSq) { bestSq = dSq; best = c; }
+        }
+        return best;
+    }
+
+    /// <summary>The Collector takes a core from the tail. Returns its value (0 if it wasn't in the tail).</summary>
+    public int StealCore(LootCore c)
+    {
+        if (c == null || !Cores.Remove(c)) return 0;
+        int v = c.value;
+        Destroy(c.gameObject);
+        return v;
     }
 
     /// <summary>Called by the evac pad: removes the whole tail and returns what it was worth.</summary>

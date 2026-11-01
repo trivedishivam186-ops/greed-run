@@ -19,6 +19,25 @@ public class EnemySpawner : MonoBehaviour
     [Tooltip("The Player object (needs PlayerHealth).")]
     public PlayerHealth player;
 
+    [Header("Extra enemy types (designer knobs)")]
+    [Tooltip("Fast, fragile enemy. Leave empty to turn off.")]
+    public Enemy runnerPrefab;
+    [Tooltip("First wave Runners can appear in.")]
+    public int runnerFromWave = 3;
+    [Tooltip("Share of enemies that are Runners in their first wave (0.2 = 20%).")]
+    [Range(0f, 1f)] public float runnerShareStart = 0.2f;
+    [Tooltip("Extra share each wave after that.")]
+    [Range(0f, 0.2f)] public float runnerSharePerWave = 0.03f;
+    [Range(0f, 1f)] public float runnerShareMax = 0.4f;
+
+    [Tooltip("Slow, tough enemy. Leave empty to turn off.")]
+    public Enemy brutePrefab;
+    [Tooltip("First wave Brutes can appear in.")]
+    public int bruteFromWave = 5;
+    [Range(0f, 1f)] public float bruteShareStart = 0.08f;
+    [Range(0f, 0.2f)] public float bruteSharePerWave = 0.02f;
+    [Range(0f, 1f)] public float bruteShareMax = 0.2f;
+
     [Header("Where enemies appear")]
     [Tooltip("Enemies spawn on a square this far from the centre. The outer neon edge is at 28.")]
     public float spawnDistance = 31f;
@@ -146,6 +165,25 @@ public class EnemySpawner : MonoBehaviour
         Debug.Log($"Greed! Jumped to wave {CurrentWave}");
     }
 
+    /// <summary>Choose which enemy to spawn, based on the wave number.</summary>
+    Enemy PickType()
+    {
+        float roll = Random.value;
+
+        if (brutePrefab != null && CurrentWave >= bruteFromWave)
+        {
+            float share = Mathf.Min(bruteShareMax, bruteShareStart + bruteSharePerWave * (CurrentWave - bruteFromWave));
+            if (roll < share) return brutePrefab;
+            roll -= share;
+        }
+        if (runnerPrefab != null && CurrentWave >= runnerFromWave)
+        {
+            float share = Mathf.Min(runnerShareMax, runnerShareStart + runnerSharePerWave * (CurrentWave - runnerFromWave));
+            if (roll < share) return runnerPrefab;
+        }
+        return enemyPrefab;
+    }
+
     int AliveCount()
     {
         int n = 0;
@@ -167,7 +205,7 @@ public class EnemySpawner : MonoBehaviour
             default: pos = new Vector3(-spawnDistance, 0f, along); break; // left
         }
 
-        Enemy e = Instantiate(enemyPrefab, pos, Quaternion.identity);
+        Enemy e = Instantiate(PickType(), pos, Quaternion.identity);
         float speedMultiplier = 1f + speedIncreasePerWave * (CurrentWave - 1);
         e.Init(player.transform, player, speedMultiplier);
     }
