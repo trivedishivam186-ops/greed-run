@@ -217,7 +217,7 @@ public class StashShop : MonoBehaviour
             RectTransform row = NewRect($"Upgrade{i + 1}", s);
             row.anchorMin = row.anchorMax = new Vector2(0.5f, 0.5f);
             row.sizeDelta = new Vector2(470f, 105f);
-            row.anchoredPosition = new Vector2(0f, 115f - i * 120f);
+            row.anchoredPosition = new Vector2(0f, 140f - i * 112f); // tighter, to fit the Threat selector below
 
             Image bg = AddImage(row, CardBg);
             bg.raycastTarget = true;
@@ -245,9 +245,9 @@ public class StashShop : MonoBehaviour
         }
 
         // Threat Level selector:  <  THREAT LEVEL 2  >
-        threatText = Text("Threat", s, "", 28, Color.white, FontStyles.Bold, new Vector2(0, -300), new Vector2(380, 100));
-        threatDown = ArrowButton(s, "<", new Vector2(-215, -300), () => ChangeThreat(-1));
-        threatUp = ArrowButton(s, ">", new Vector2(215, -300), () => ChangeThreat(+1));
+        threatText = Text("Threat", s, "", 28, Color.white, FontStyles.Bold, new Vector2(0, -305), new Vector2(380, 100));
+        threatDown = ArrowButton(s, "<", new Vector2(-215, -305), () => ChangeThreat(-1));
+        threatUp = ArrowButton(s, ">", new Vector2(215, -305), () => ChangeThreat(+1));
 
         RectTransform deploy = NewRect("Deploy", s);
         deploy.anchorMin = deploy.anchorMax = new Vector2(0.5f, 0.5f);
