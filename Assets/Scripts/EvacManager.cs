@@ -67,7 +67,7 @@ public class EvacManager : MonoBehaviour
     public bool RunOver { get; private set; }
 
     /// <summary>The loot at risk right now, including the greed multiplier.</summary>
-    public int AtRiskWithGreed => lootTrail != null ? Mathf.RoundToInt(lootTrail.AtRisk * GreedMultiplier) : 0;
+    public int AtRiskWithGreed => lootTrail != null ? Mathf.RoundToInt(lootTrail.AtRisk * GreedMultiplier * Threat.LootMultiplier) : 0;
 
     // What you'd have banked if you'd left at the last evac (for the death screen).
     int bankableAtLastEvac;
@@ -165,15 +165,17 @@ public class EvacManager : MonoBehaviour
         int wave = spawner != null ? spawner.CurrentWave : 0;
         bool bestWave = Stash.TryRecordWave(wave);
         bool bestBank = Stash.TryRecordBank(banked);
+        int unlocked = Threat.TryUnlockNext(wave);
 
         string body =
             $"BANKED  +{banked}{NewBest(bestBank)}\n" +
-            $"WAVE  {wave}{NewBest(bestWave)}\n" +
-            $"GREED  x{GreedMultiplier:0.0}   ·   EVACS SKIPPED  {EvacsSkipped}\n\n" +
+            $"WAVE  {wave}{NewBest(bestWave)}   ·   THREAT  {Threat.Selected}\n" +
+            $"GREED  x{GreedMultiplier:0.0}   ·   EVACS SKIPPED  {EvacsSkipped}\n" +
+            (unlocked > 0 ? $"<color=#FF3C50>THREAT {unlocked} UNLOCKED</color>\n" : "") + "\n" +
             Records() + $"\nSTASH  {stash}";
 
         if (endScreen != null) endScreen.Show(bestBank || bestWave ? "NEW PERSONAL BEST" : "EXTRACTED", body);
-        if (bestBank || bestWave) OnNewBest?.Invoke();
+        if (bestBank || bestWave || unlocked > 0) OnNewBest?.Invoke();
     }
 
     void EndRunDied()
@@ -182,7 +184,7 @@ public class EvacManager : MonoBehaviour
         if (evacPad != null) evacPad.gameObject.SetActive(false);
 
         int lost = lootTrail != null
-            ? Mathf.RoundToInt(Mathf.Max(lootTrail.AtRisk, lootTrail.LostOnDeath) * GreedMultiplier)
+            ? Mathf.RoundToInt(Mathf.Max(lootTrail.AtRisk, lootTrail.LostOnDeath) * GreedMultiplier * Threat.LootMultiplier)
             : 0;
 
         int wave = spawner != null ? spawner.CurrentWave : 0;

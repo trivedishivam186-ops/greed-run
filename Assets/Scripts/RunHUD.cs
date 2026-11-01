@@ -42,7 +42,8 @@ public class RunHUD : MonoBehaviour
                 string best = Stash.BestWave > 0
                     ? (spawner.CurrentWave > Stash.BestWave ? "  <color=#00E5FF>NEW BEST</color>" : $"  ·  BEST {Stash.BestWave}")
                     : "";
-                waveText.text = $"WAVE {spawner.CurrentWave}\n<size=70%>{spawner.EnemiesRemaining} LEFT{best}</size>";
+                string threat = Threat.Selected > 1 ? $"<color=#FF3C50>T{Threat.Selected}</color>  " : "";
+                waveText.text = $"{threat}WAVE {spawner.CurrentWave}\n<size=70%>{spawner.EnemiesRemaining} LEFT{best}</size>";
             }
         }
 

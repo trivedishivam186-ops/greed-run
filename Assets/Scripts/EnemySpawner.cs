@@ -191,8 +191,8 @@ public class EnemySpawner : MonoBehaviour
     }
 
     float SpeedMult()  => 1f + speedIncreasePerWave * (CurrentWave - 1);
-    float HealthMult() => 1f + healthIncreasePerWave * (CurrentWave - 1);
-    float DamageMult() => 1f + damageIncreasePerWave * (CurrentWave - 1);
+    float HealthMult() => (1f + healthIncreasePerWave * (CurrentWave - 1)) * Threat.EnemyMultiplier;
+    float DamageMult() => (1f + damageIncreasePerWave * (CurrentWave - 1)) * Threat.EnemyMultiplier;
 
     void SpawnBoss(int bossNumber)
     {

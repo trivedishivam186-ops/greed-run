@@ -54,6 +54,16 @@ public class StashShop : MonoBehaviour
         new ShopUpgrade { id = "blackbox",title = "BLACK BOX",       description = "Keep 10% of your loot if you die", type = ShopUpgradeType.KeepOnDeathPercent, amountPerLevel = 10, maxLevel = 3, baseCost = 250, costGrowth = 2f },
     };
 
+    [Header("Threat Levels (designer knobs)")]
+    [Tooltip("Each Threat Level adds this much enemy health and damage (0.3 = +30%).")]
+    public float threatEnemyBonusPerLevel = 0.3f;
+    [Tooltip("Each Threat Level adds this much loot value (0.5 = +50%).")]
+    public float threatLootBonusPerLevel = 0.5f;
+    [Tooltip("Extract after reaching this wave on your highest Threat Level to unlock the next one.")]
+    public int threatUnlockWave = 5;
+    [Tooltip("Highest Threat Level.")]
+    public int threatMaxLevel = 10;
+
     /// <summary>Share of carried loot kept when you die (from the Black Box upgrade). 0.2 = 20%.</summary>
     public static float KeepOnDeath { get; private set; }
 
@@ -70,7 +80,8 @@ public class StashShop : MonoBehaviour
     static readonly Color CardBg = new Color(0.04f, 0.07f, 0.12f, 0.95f);
 
     GameObject screen;
-    TMP_Text stashText, recordsText;
+    TMP_Text stashText, recordsText, threatText;
+    GameObject threatDown, threatUp;
     readonly List<TMP_Text> rowTitles = new List<TMP_Text>();
     readonly List<TMP_Text> rowDescs = new List<TMP_Text>();
     readonly List<TMP_Text> rowCosts = new List<TMP_Text>();
@@ -78,6 +89,10 @@ public class StashShop : MonoBehaviour
     void Awake()
     {
         KeepOnDeath = 0f;
+        Threat.EnemyBonusPerLevel = threatEnemyBonusPerLevel;
+        Threat.LootBonusPerLevel = threatLootBonusPerLevel;
+        Threat.UnlockWave = threatUnlockWave;
+        Threat.MaxLevel = threatMaxLevel;
         BuildUI();
     }
 
@@ -130,8 +145,26 @@ public class StashShop : MonoBehaviour
         OnDeploy?.Invoke();
     }
 
+    void ChangeThreat(int delta)
+    {
+        Threat.Selected = Threat.Selected + delta;
+        OnPurchased?.Invoke(); // reuse the click sound
+        Refresh();
+    }
+
     void Refresh()
     {
+        int t = Threat.Selected;
+        string effect = t == 1
+            ? "Standard enemies and loot"
+            : $"Enemies +{Mathf.RoundToInt(threatEnemyBonusPerLevel * (t - 1) * 100)}%   ·   Loot x{Threat.LootMultiplier:0.0}";
+        string unlock = Threat.Unlocked < Threat.MaxLevel
+            ? $"\n<size=75%><color=#9AA4B2>Unlock Threat {Threat.Unlocked + 1}: extract after wave {Threat.UnlockWave} on Threat {Threat.Unlocked}</color></size>"
+            : "";
+        threatText.text = $"<color=#FF3C50>THREAT LEVEL {t}</color>\n<size=70%>{effect}</size>{unlock}";
+        threatDown.SetActive(t > 1);
+        threatUp.SetActive(t < Threat.Unlocked);
+
         stashText.text = $"STASH  {Stash.Total:N0}";
         recordsText.text = $"BEST WAVE  {Stash.BestWave}   ·   BEST BANK  {Stash.BestBank:N0}";
 
@@ -211,13 +244,15 @@ public class StashShop : MonoBehaviour
             rowCosts.Add(cost);
         }
 
-        TMP_Text hint = Text("Hint", s, "TAP AN UPGRADE TO BUY IT", 18, Grey, FontStyles.Normal, new Vector2(0, -300), new Vector2(520, 30));
-        hint.alpha = 0.8f;
+        // Threat Level selector:  <  THREAT LEVEL 2  >
+        threatText = Text("Threat", s, "", 28, Color.white, FontStyles.Bold, new Vector2(0, -300), new Vector2(380, 100));
+        threatDown = ArrowButton(s, "<", new Vector2(-215, -300), () => ChangeThreat(-1));
+        threatUp = ArrowButton(s, ">", new Vector2(215, -300), () => ChangeThreat(+1));
 
         RectTransform deploy = NewRect("Deploy", s);
         deploy.anchorMin = deploy.anchorMax = new Vector2(0.5f, 0.5f);
         deploy.sizeDelta = new Vector2(360f, 90f);
-        deploy.anchoredPosition = new Vector2(0f, -380f);
+        deploy.anchoredPosition = new Vector2(0f, -405f);
         Image dbg = AddImage(deploy, Gold);
         dbg.raycastTarget = true;
         Button db = deploy.gameObject.AddComponent<Button>();
@@ -228,6 +263,25 @@ public class StashShop : MonoBehaviour
 
         s.SetAsLastSibling(); // on top of everything
         screen.SetActive(false);
+    }
+
+    GameObject ArrowButton(Transform parent, string label, Vector2 pos, UnityEngine.Events.UnityAction onClick)
+    {
+        RectTransform r = NewRect("Arrow" + label, parent);
+        r.anchorMin = r.anchorMax = new Vector2(0.5f, 0.5f);
+        r.sizeDelta = new Vector2(70f, 70f);
+        r.anchoredPosition = pos;
+        Image bg = AddImage(r, CardBg);
+        bg.raycastTarget = true;
+        Outline o = r.gameObject.AddComponent<Outline>();
+        o.effectColor = Red;
+        o.effectDistance = new Vector2(2f, -2f);
+        Button b = r.gameObject.AddComponent<Button>();
+        b.targetGraphic = bg;
+        b.onClick.AddListener(onClick);
+        TMP_Text t = Text("Label", r, label, 40, Red, FontStyles.Bold, Vector2.zero, Vector2.zero);
+        Stretch(t.rectTransform);
+        return r.gameObject;
     }
 
     RectTransform NewRect(string name, Transform parent)
