@@ -48,3 +48,12 @@ Notes from playing the prototype, and what was changed because of them. Used for
 | 1 | Still too easy, even with Runners and Brutes | Enemy types differed in style, but not in threat – and none of them got tougher over time | Enemies now get +12% health and +5% damage every wave, and each type is a clear step up (Grunt < Runner < Brute < Boss) |
 | 2 | The Collector didn't work: fast, small and weak, and losing ~80 loot to it felt like nothing | A threat has to be scary *relative to what you're carrying*; a small thief isn't | **Cut the Collector.** Replaced with a **Titan boss every 5th wave** (reference: Helldivers 2) – big health bar, a telegraphed charge attack, drops a big loot pile when killed |
 | 3 | I'd rather see that I'm carrying loot than drag a trail | The trail got long and noisy; what matters is "you have it, you lose it if you die" | Loot now **orbits the robot** (up to 10 cores visible; the orbit spins faster the richer you are). Enemies no longer knock loot off – it's only lost on death, and the Black Box saves part of it |
+
+## Playtest 5 – Sun 1 Nov (me, in editor)
+
+**Build:** + Threat Levels on the start screen.
+
+| # | What I noticed | Why it matters | What I changed |
+|---|---|---|---|
+| 1 | Shop upgrades cap at level 5 – once maxed, banked loot has nothing left to buy | The greed loop dies when the reward stops meaning anything | Added **Threat Levels** (reference: Helldivers difficulty tiers): +30% enemy health/damage and +50% loot per level, unlocked by extracting after wave 5. Progression moves from buying to mastery |
+| 2 | Now the game gets harder after a few waves, and I have to choose carefully which upgrades to take | Choices only matter when you can't have everything – this is the build decision working | Keep |
