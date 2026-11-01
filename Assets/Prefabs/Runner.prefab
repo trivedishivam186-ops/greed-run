@@ -47,13 +47,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
   moveSpeed: 6
-  contactDamage: 6
+  contactDamage: 10
   hitCooldown: 0.6
   contactRadius: 1.3
   separationRadius: 1.2
   separationStrength: 3
-  maxHealth: 10
+  maxHealth: 25
   hitPunch: 0.3
+  nukeDamageFraction: 1
   hurtsPlayer: 1
   knocksLoot: 1
   chaseTarget: {fileID: 0}

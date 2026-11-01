@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4147104428659510211}
   - component: {fileID: 7637292215931229295}
+  - component: {fileID: -1086670313610122357}
   m_Layer: 0
   m_Name: Brute
   m_TagString: Untagged
@@ -27,7 +28,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 5}
-  m_LocalScale: {x: 1.8, y: 1.8, z: 1.8}
+  m_LocalScale: {x: 3, y: 3, z: 3}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5764465013219989343}
@@ -46,17 +47,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8e3a1f50bfff5b42a6c6da287a33ff7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
-  moveSpeed: 2.2
-  contactDamage: 25
+  moveSpeed: 2.5
+  contactDamage: 35
   hitCooldown: 0.6
-  contactRadius: 2
-  separationRadius: 2.2
+  contactRadius: 3.5
+  separationRadius: 4
   separationStrength: 3
-  maxHealth: 80
+  maxHealth: 600
   hitPunch: 0.3
+  nukeDamageFraction: 0.25
   hurtsPlayer: 1
   knocksLoot: 1
   chaseTarget: {fileID: 0}
+--- !u!114 &-1086670313610122357
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3262015472885110472}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a010b0bc2ff990e4b8d21206f8da870f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Boss
+  chargeInterval: 5
+  windupTime: 0.9
+  chargeSpeed: 22
+  chargeDistance: 18
+  warningWidth: 2.2
+  warningMaterial: {fileID: 2100000, guid: 95f8b8350781ca647b1a553c913622e0, type: 2}
+  lootOnDeath: 25
+  lootPrefab: {fileID: 5197664529986018630, guid: fe916bc9eb5fb5247ac75037f66fdea4, type: 3}
+  bossName: TITAN
 --- !u!1 &4214500168049168397
 GameObject:
   m_ObjectHideFlags: 0
@@ -123,7 +146,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 00b95e9b5b867b44c9699d0f524bfa81, type: 2}
+  - {fileID: 2100000, guid: cb91635fe5563de47ae3ce874112be88, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -213,7 +236,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 00b95e9b5b867b44c9699d0f524bfa81, type: 2}
+  - {fileID: 2100000, guid: cb91635fe5563de47ae3ce874112be88, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
