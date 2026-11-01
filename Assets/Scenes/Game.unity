@@ -1007,6 +1007,12 @@ MonoBehaviour:
   knockCooldown: 0.35
   knockScatter: 2.5
   repickDelay: 0.8
+  maxVisibleCores: 10
+  orbitRadius: 1.8
+  orbitSpeedMin: 60
+  orbitSpeedMax: 260
+  valueForMaxSpeed: 500
+  enemiesKnockLoot: 0
 --- !u!1 &420893709
 GameObject:
   m_ObjectHideFlags: 0
@@ -2018,9 +2024,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
   enemyPrefab: {fileID: 7637292215931229295, guid: e5258babcdcf0344fa7474c4f236e480, type: 3}
   player: {fileID: 414697309}
+  runnerPrefab: {fileID: 7637292215931229295, guid: dbd6b3955fc78114498f6de99d499572, type: 3}
+  runnerFromWave: 2
+  runnerShareStart: 0.2
+  runnerSharePerWave: 0.03
+  runnerShareMax: 0.4
+  brutePrefab: {fileID: 7637292215931229295, guid: f2fa6717967504443b226a8684810e29, type: 3}
+  bruteFromWave: 4
+  bruteShareStart: 0.08
+  bruteSharePerWave: 0.02
+  bruteShareMax: 0.2
   spawnDistance: 31
-  firstWaveEnemies: 10
-  extraEnemiesPerWave: 6
+  firstWaveEnemies: 14
+  extraEnemiesPerWave: 8
   firstWaveDelay: 2
   breatherTime: 5
   startSpawnInterval: 1.2
@@ -2029,6 +2045,12 @@ MonoBehaviour:
   startGroupSize: 1
   groupSizeIncreasePerWave: 1
   speedIncreasePerWave: 0.05
+  healthIncreasePerWave: 0.12
+  damageIncreasePerWave: 0.05
+  bossPrefab: {fileID: 7637292215931229295, guid: 746722289fcf7ba4ca2c611ed6b9efe9, type: 3}
+  bossEvery: 5
+  bossWaveEnemyShare: 0.5
+  bossHealthIncrease: 0.5
   maxAlive: 150
 --- !u!4 &1317318138
 Transform:
@@ -2658,6 +2680,10 @@ MonoBehaviour:
     maxLevel: 3
     baseCost: 250
     costGrowth: 2
+  threatEnemyBonusPerLevel: 0.3
+  threatLootBonusPerLevel: 0.5
+  threatUnlockWave: 5
+  threatMaxLevel: 10
 --- !u!4 &1703357347
 Transform:
   m_ObjectHideFlags: 0
@@ -3346,7 +3372,7 @@ MonoBehaviour:
   successSound: {fileID: 8300000, guid: 18d176ae026e4424da9b4df77856de46, type: 3}
   failureSound: {fileID: 8300000, guid: 34d44ff68710c6c44adea66a58198db8, type: 3}
   evacSound: {fileID: 8300000, guid: 52ab467589b2d3a488d4bf26b4bf5857, type: 3}
-  masterVolume: 0.8
+  masterVolume: 0.412
   shootVolume: 0.25
   musicVolume: 0.35
   knockOffSound: 0
