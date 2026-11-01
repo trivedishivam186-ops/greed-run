@@ -37,6 +37,9 @@ public class GameFeel : MonoBehaviour
     [Range(0f, 1f)] public float shootVolume = 0.25f;
     [Range(0f, 1f)] public float musicVolume = 0.35f;
 
+    [Tooltip("Volume of the evac-open sound.")]
+    [Range(0f, 1f)] public float evacVolume = 0.4f;
+
     [Tooltip("Play a sound when an enemy knocks a core off your tail. Off by default (it got noisy in big hordes).")]
     public bool knockOffSound = false;
 
@@ -309,7 +312,7 @@ public class GameFeel : MonoBehaviour
 
     void HandleEvacOpened()
     {
-        Play("evac_open", 0.9f, 0f);
+        Play("evac_open", evacVolume, 0f);
         Flash(new Color(1f, 0.7f, 0f), 0.15f);
         Shake(shakeOnEvacOpen);
     }
