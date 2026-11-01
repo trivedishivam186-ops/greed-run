@@ -42,15 +42,38 @@ public class LootTrail : MonoBehaviour
     [Tooltip("Seconds before a knocked-off core can be grabbed again.")]
     public float repickDelay = 0.8f;
 
-    /// <summary>The cores currently in the tail, nearest the robot first.</summary>
+    [Header("Orbit (designer knobs)")]
+    [Tooltip("Carried cores circle the robot. Only this many are shown; the rest still count, they just don't add clutter.")]
+    public int maxVisibleCores = 10;
+
+    [Tooltip("Radius of the circle around the robot.")]
+    public float orbitRadius = 1.8f;
+
+    [Tooltip("Spin speed (degrees per second) with little loot...")]
+    public float orbitSpeedMin = 60f;
+
+    [Tooltip("...and with a lot. The orbit speeds up as you get richer - greed you can see.")]
+    public float orbitSpeedMax = 260f;
+
+    [Tooltip("Loot value at which the orbit reaches full speed.")]
+    public int valueForMaxSpeed = 500;
+
+    [Tooltip("Can enemies knock cores out of the orbit? Off: loot is only lost if you die.")]
+    public bool enemiesKnockLoot = false;
+
+    /// <summary>The cores currently orbiting the robot.</summary>
     public readonly List<LootCore> Cores = new List<LootCore>();
+
+    /// <summary>Value carried beyond the visible cores.</summary>
+    int hiddenValue;
+    float orbitAngle;
 
     /// <summary>Total value you're carrying - what you'd lose if you died now.</summary>
     public int AtRisk
     {
         get
         {
-            int total = 0;
+            int total = hiddenValue;
             for (int i = 0; i < Cores.Count; i++) total += Cores[i].value;
             return total;
         }
@@ -83,8 +106,8 @@ public class LootTrail : MonoBehaviour
         }
 
         PickUpNearby();
-        FollowPlayer();
-        CheckEnemiesStealing();
+        Orbit();
+        if (enemiesKnockLoot) CheckEnemiesStealing();
     }
 
     void PickUpNearby()
@@ -100,9 +123,20 @@ public class LootTrail : MonoBehaviour
 
             if (d.magnitude <= collectDistance)
             {
-                c.JoinTrail();
-                Cores.Add(c); // newest cores go on the end of the tail
-                OnPickedUp?.Invoke(c.transform.position, Cores.Count);
+                Vector3 at = c.transform.position;
+                if (Cores.Count < maxVisibleCores)
+                {
+                    c.JoinTrail();
+                    Cores.Add(c);
+                }
+                else
+                {
+                    // Orbit is full: keep the value, drop the extra object.
+                    c.JoinTrail();
+                    hiddenValue += c.value;
+                    Destroy(c.gameObject);
+                }
+                OnPickedUp?.Invoke(at, Mathf.Max(Cores.Count, AtRisk / 10));
             }
             else
             {
@@ -113,6 +147,27 @@ public class LootTrail : MonoBehaviour
         }
     }
 
+    void Orbit()
+    {
+        if (Cores.Count == 0) return;
+
+        // Spin faster the more you carry.
+        float t = Mathf.Clamp01(AtRisk / (float)Mathf.Max(1, valueForMaxSpeed));
+        orbitAngle += Mathf.Lerp(orbitSpeedMin, orbitSpeedMax, t) * Time.deltaTime;
+
+        float step = 360f / Cores.Count;
+        for (int i = 0; i < Cores.Count; i++)
+        {
+            LootCore c = Cores[i];
+            if (c == null) continue;
+            float a = (orbitAngle + step * i) * Mathf.Deg2Rad;
+            Vector3 target = transform.position + new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * orbitRadius;
+            target.y = c.floatHeight + 0.4f;
+            c.transform.position = Vector3.Lerp(c.transform.position, target, followSharpness * Time.deltaTime);
+        }
+    }
+
+    // Old snake-style trail, kept for reference (not used any more).
     void FollowPlayer()
     {
         // Each core follows the one in front of it, like a snake.
@@ -203,6 +258,7 @@ public class LootTrail : MonoBehaviour
         for (int i = 0; i < Cores.Count; i++)
             if (Cores[i] != null) Destroy(Cores[i].gameObject);
         Cores.Clear();
+        hiddenValue = 0;
         return total;
     }
 
@@ -214,6 +270,7 @@ public class LootTrail : MonoBehaviour
         for (int i = 0; i < Cores.Count; i++)
             if (Cores[i] != null) Destroy(Cores[i].gameObject);
         Cores.Clear();
+        hiddenValue = 0;
         if (lost > 0) Debug.Log($"Died carrying {lost}. All lost.");
     }
 }

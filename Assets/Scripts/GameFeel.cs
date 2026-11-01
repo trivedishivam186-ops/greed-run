@@ -136,6 +136,9 @@ public class GameFeel : MonoBehaviour
         StashShop.OnPurchased += HandlePurchased;
         StashShop.OnDeploy += HandleDeploy;
         CollectorDirector.OnCollectorSent += HandleCollectorSent;
+        Boss.OnBossSpawned += HandleBossSpawned;
+        Boss.OnBossCharge += HandleBossCharge;
+        Boss.OnBossKilled += HandleBossKilled;
         Collector.OnEscaped += HandleCollectorEscaped;
         EnemySpawner.OnWaveStarted += HandleWaveStarted;
         EnemySpawner.OnWaveCleared += HandleWaveCleared;
@@ -159,9 +162,35 @@ public class GameFeel : MonoBehaviour
         StashShop.OnPurchased -= HandlePurchased;
         StashShop.OnDeploy -= HandleDeploy;
         CollectorDirector.OnCollectorSent -= HandleCollectorSent;
+        Boss.OnBossSpawned -= HandleBossSpawned;
+        Boss.OnBossCharge -= HandleBossCharge;
+        Boss.OnBossKilled -= HandleBossKilled;
         Collector.OnEscaped -= HandleCollectorEscaped;
         EnemySpawner.OnWaveStarted -= HandleWaveStarted;
         EnemySpawner.OnWaveCleared -= HandleWaveCleared;
+    }
+
+    void HandleBossSpawned()
+    {
+        Play("greed", 1f, 0f, 0.8f);
+        Play("wave_start", 1f, 0f, 0.7f);
+        Flash(new Color(1f, 0.1f, 0.15f), 0.35f);
+        Shake(0.5f);
+    }
+
+    void HandleBossCharge()
+    {
+        Play("hurt", 0.9f, 0f, 0.6f);
+        Shake(0.3f);
+    }
+
+    void HandleBossKilled(Vector3 pos)
+    {
+        Play("nuke", 1f, 0f, 1.2f);
+        Burst(redBurst, pos + Vector3.up, 40, 12f, 0.35f, 1.2f);
+        Burst(goldBurst, pos + Vector3.up, 30, 9f, 0.25f, 1.2f);
+        Flash(new Color(1f, 0.8f, 0.2f), 0.5f);
+        Shake(0.9f);
     }
 
     void HandleCollectorSent()
