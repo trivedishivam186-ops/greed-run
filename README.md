@@ -22,6 +22,6 @@ See [`docs/ai-log.md`](docs/ai-log.md) for a running log of which AI tools were 
 
 ## Credits
 
-- **Music and some sound effects** (background music, success, failure and evac sounds): [Ovani Sound](https://ovanisound.com), royalty-free licence (purchased). These files aren't included in this repository, because the licence covers using them in games, not redistributing the raw audio. A fresh copy of the project falls back to the built-in sounds below.
+- **Music and some sound effects** (background music, success, failure and evac sounds): [Ovani Sound](https://ovanisound.com), royalty-free licence (purchased). Bought by me and used under that licence; please don't reuse them outside this project.
 - **Other sound effects** (shoot, hit, pickup, knock-off, hurt and others in `Assets/Resources/Audio`): generated with code for this project.
 - **Everything else** (models, materials, scripts): made for this project.
